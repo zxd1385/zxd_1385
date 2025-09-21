@@ -1,16 +1,15 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { ChakraProvider, defaultSystem } from "@chakra-ui/react";
-// If defaultSystem doesn't exist, maybe `system` or something similar — depends on version.
-import { BrowserRouter } from "react-router-dom";
+import { HashRouter } from "react-router-dom"; // Import HashRouter instead of BrowserRouter
 import App from "./App";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <ChakraProvider value={defaultSystem}>
-      <BrowserRouter>
+      <HashRouter> {/* Use HashRouter here */}
         <App />
-      </BrowserRouter>
+      </HashRouter>
     </ChakraProvider>
   </React.StrictMode>
 );
