@@ -46,7 +46,7 @@ function Home() {
       mt={{ base: 6, md: 0 }} // margin top on mobile for spacing
     >
       <PixelatedCanvas
-        src="/myimg.jpg"
+        src="/myimg.jpg" 
         width={width}
         height={height}
         cellSize={3}
