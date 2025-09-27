@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { FaBars, FaTimes } from "react-icons/fa";
+import AuthButton from "./serverComponents/AuthButton";
 
 
 export default function Navbar() {
@@ -15,15 +16,23 @@ export default function Navbar() {
   }, []);
 
   const navItems = [
-    { name: "Home", href: "/" },
-    { name: "About", href: "/about" },
-    { name: "Projects", href: "/projects" },
-    { name: "Contact", href: "/contact" },
+    { name: "Home", href: "#/" },
+    { name: "About", href: "#/about" },
+    { name: "Projects", href: "#/projects" },
+    { name: "Articles", href: "#/articles" },
+    { name: "Contact", href: "#/contact" },       // visible if logged in
+    { name: "Create Article", href: "#/creat-article" }, // visible if logged in
+    { name: "Create Project", href: "#/creat-project" }  // visible if logged in
   ];
+  
 
   return (
     <nav style={styles.navbar}>
-      <div style={styles.logo}>MyLogo</div>
+      <div style={styles.logo}>
+        <span style={{ marginRight: "10px" }}>zxdClub</span>
+        <AuthButton />
+      </div>
+      
 
       {isMobile ? (
         <>
@@ -75,7 +84,10 @@ const styles = {
   },
   logo: {
     fontWeight: "bold",
-    fontSize: "1.2rem",
+    fontSize: "1rem",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center"
   },
   menu: {
     display: "flex",

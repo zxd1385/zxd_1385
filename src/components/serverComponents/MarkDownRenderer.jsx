@@ -11,7 +11,7 @@ import {
 
 export default function MarkdownRenderer({ content }) {
   return (
-    <Box p={4}>
+    <Box p={1}>
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         components={{

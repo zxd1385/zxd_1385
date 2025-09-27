@@ -1,0 +1,85 @@
+import { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
+import { Box, Heading, Text, Image, Button, Link, VStack, HStack, Flex } from '@chakra-ui/react';
+import { supabase } from '../lib/supabaseClient';
+import MarkdownRenderer from '../components/serverComponents/MarkDownRenderer';
+
+const ProjectPage = () => {
+  const { id } = useParams(); // Get project ID from the URL
+  const [project, setProject] = useState(null);
+
+  useEffect(() => {
+    const fetchProject = async () => {
+      const { data, error } = await supabase
+        .from('projects')
+        .select('*')
+        .eq('id', id)
+        .single(); // Fetch the project by ID
+
+      if (error) {
+        console.error(error);
+      } else {
+        setProject(data);
+      }
+    };
+
+    fetchProject();
+  }, [id]);
+
+  if (!project) return <Text>Loading...</Text>;
+
+  return (
+    <Flex
+      minH="100vh"
+      align="center"
+      justify="center"
+      px={{ base: 3, md: 8 }}
+      py={{ base: 6, md: 12 }}
+    >
+      <Box 
+        maxW="800px" 
+        w="full"
+        bg="gray.800" 
+        borderRadius="lg" 
+        shadow="xl" 
+        color="white"
+        p={{ base: 6, md: 12 }}
+      >
+        <VStack spacing={6} align="stretch">
+          <Heading textAlign="center" size="2xl">
+            {project.title}
+          </Heading>
+
+          {project.image_url && (
+            <Image 
+              src={project.image_url} 
+              alt={project.title} 
+              borderRadius="md" 
+              objectFit="cover" 
+              maxH="400px"
+              w="full"
+            />
+          )}
+
+          <HStack justify="space-between" fontSize="sm" color="gray.400">
+            <Text>Created at: {new Date(project.created_at).toLocaleDateString()}</Text>
+          </HStack>
+
+          <Box>
+            <MarkdownRenderer content={project.description} />
+          </Box>
+
+          {project.pdf_url && (
+            <Link href={project.pdf_url} isExternal _hover={{ textDecoration: 'none' }}>
+              <Button colorScheme="teal" w="full">
+                Download Project PDF
+              </Button>
+            </Link>
+          )}
+        </VStack>
+      </Box>
+    </Flex>
+  );
+};
+
+export default ProjectPage;

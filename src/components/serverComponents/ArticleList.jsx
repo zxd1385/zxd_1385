@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { Box, Button, Text, VStack, Image, Spinner, useBreakpointValue } from "@chakra-ui/react";
+import { Box, Text, VStack, Image, Spinner, Button } from "@chakra-ui/react";
 import { motion } from "framer-motion";
 import LoadingScreen from "../ui/Loading";
+import matter from "gray-matter"; // Import gray-matter
 
 // Optional: Motion component for animation
 const MotionBox = motion(Box);
@@ -36,10 +37,17 @@ function ArticleList() {
           const mdFile = folderFiles.find(f => f.name === "index.md");
 
           if (mdFile) {
+            // Fetch the markdown file content to extract frontmatter
+            const markdownContent = await fetch(mdFile.download_url).then(res => res.text());
+            const { data: meta } = matter(markdownContent); // Get the frontmatter data (title, description)
+
+            // Push the article data along with its metadata (title, description)
             articlesData.push({
               folderName: folder.name,
               markdownFile: mdFile,
               files: folderFiles.filter(file => file.name !== "index.md"), // Other files (images, PDFs)
+              title: meta.title || folder.name, // Using the frontmatter title or fallback to folder name
+              description: meta.description || "No description available.", // Using the frontmatter description
             });
           }
         }
@@ -92,10 +100,10 @@ function ArticleList() {
               )}
             </Box>
             <Text fontSize="xl" fontWeight="semibold" color="teal.500">
-              {article.folderName}
+              {article.title}
             </Text>
             <Text fontSize="sm" color="gray.500" mt={2} textAlign="center">
-              Click to read more
+              {article.description}
             </Text>
           </MotionBox>
         ))

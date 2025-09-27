@@ -1,83 +1,75 @@
-import React, { useState, useEffect } from "react";
-import {
-  Box,
-  Heading,
-  Link,
-  Image,
-  Stack,
-  Spinner,
-  Card,
-  CardBody,
-} from "@chakra-ui/react";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
-import { useParams } from "react-router-dom";
-import MarkdownRenderer from "../components/serverComponents/MarkDownRenderer";
-import LoadingScreen from "../components/ui/Loading";
+import { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
+import { Box, Heading, Text, VStack, Flex } from '@chakra-ui/react';
+import { supabase } from '../lib/supabaseClient';
+import MarkdownRenderer from '../components/serverComponents/MarkDownRenderer';
 
-
-export default function ArticlePage() {
-  const { folderName } = useParams();
-  const [content, setContent] = useState("");
-  const [files, setFiles] = useState([]);
-  const [loading, setLoading] = useState(true);
+const ArticlePage = () => {
+  const { id } = useParams();
+  const [article, setArticle] = useState(null);
 
   useEffect(() => {
-    async function loadData() {
-      try {
-        const res = await fetch(
-          `https://api.github.com/repos/zxd1385/MyDocuments/contents/articles/${folderName}/index.md?ref=main`
-        );
-        const data = await res.json();
-        const text = await fetch(data.download_url).then((res) => res.text());
-        setContent(text);
+    const fetchArticle = async () => {
+      const { data, error } = await supabase
+        .from('articles')
+        .select('*')
+        .eq('id', id)
+        .single();
 
-        const filesRes = await fetch(
-          `https://api.github.com/repos/zxd1385/MyDocuments/contents/articles/${folderName}?ref=main`
-        );
-        const folderFiles = await filesRes.json();
-        setFiles(folderFiles.filter((f) => f.name !== "index.md"));
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    }
-    loadData();
-  }, [folderName]);
+      if (!error) setArticle(data);
+    };
 
-  if (loading)
-    return (
-      <LoadingScreen />
-    );
+    fetchArticle();
+  }, [id]);
+
+  if (!article) return <Text>Loading...</Text>;
 
   return (
-    <Box maxW="800px" mx="auto" p={5}>
-     
-          <MarkdownRenderer content={content} /> 
-        
-    
-
-      {files.length > 0 && (
-        <Box mt={5}>
-          <Heading size="md" mb={3}>
-            Assets
+    <Flex
+      minH="100vh"
+      align="center"
+      justify="center"
+      px={{ base: 4, md: 8 }}
+      py={{ base: 8, md: 12 }}
+    >
+      <Box
+        maxW="800px"
+        w="full"
+        bg="gray.800"
+        borderRadius="lg"
+        shadow="xl"
+        color="white"
+        p={{ base: 6, md: 12 }}
+      >
+        <VStack spacing={6} align="stretch">
+          <Heading textAlign="center" size="2xl">
+            {article.title}
           </Heading>
-          <Stack spacing={4}>
-            {files.map((file) => (
-              <Box key={file.sha} borderWidth="1px" borderRadius="md" p={3}>
-                {file.name.endsWith(".pdf") ? (
-                  <Link href={file.download_url} color="teal.400" isExternal>
-                    Download PDF: {file.name}
-                  </Link>
-                ) : (
-                  <Image src={file.download_url} alt={file.name} borderRadius="md" />
-                )}
-              </Box>
-            ))}
-          </Stack>
-        </Box>
-      )}
-    </Box>
+
+          <Text 
+            mb={6} 
+            fontStyle="italic" 
+            textAlign="center" 
+            color="gray.300"
+          >
+            {article.short_description}
+          </Text>
+
+          <Text fontSize="sm" color="gray.400">
+            Created at: {new Date(article.created_at).toLocaleDateString()} by {article.author_name}
+          </Text>
+
+          <Text fontSize="sm" color="gray.400">
+            Last update: {new Date(article.updated_at).toLocaleDateString()}
+          </Text>
+
+          <Box mt={4}>
+            <MarkdownRenderer content={article.body} />
+          </Box>
+        </VStack>
+      </Box>
+    </Flex>
   );
-}
+};
+
+export default ArticlePage;
