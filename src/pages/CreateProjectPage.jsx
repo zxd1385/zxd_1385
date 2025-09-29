@@ -112,6 +112,7 @@ const CreateProjectPage = () => {
       pdf_url: pdfFile
         ? supabase.storage.from('project-pdfs').getPublicUrl(`public/${pdfFile.name}`).data.publicUrl
         : existingPdfUrl,
+        is_visible: false
 
     };
 

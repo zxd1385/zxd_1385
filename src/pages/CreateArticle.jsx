@@ -12,6 +12,7 @@ const CreateArticle = () => {
   const [shortDesc, setShortDesc] = useState('');
   const [body, setBody] = useState('');
   const [isVisible, setIsVisible] = useState(false);
+  const [publishTime, setPublishTime] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -67,6 +68,7 @@ const CreateArticle = () => {
         setShortDesc(data.short_description);
         setBody(data.body);
         setIsVisible(data.is_visible);
+        setPublishTime(data.publish_time);
       }
       setLoading(false);
     };
@@ -92,6 +94,7 @@ const CreateArticle = () => {
       publisher_id: session.user.id,
       is_visible: false,
       author_name: authorName,
+      publish_time: publishTime,
     };
 
     let errorInsert;
@@ -167,6 +170,19 @@ const CreateArticle = () => {
             rows={5}
             mb={3}
           />
+
+          {/* Publish Time Input (New Field) */}
+      <Text color="gray.300">Publish Time (Optional)</Text>
+      <Input
+        type="datetime-local"
+        onChange={(e) => setPublishTime(e.target.value)}
+        variant="filled"
+        color="gray.300"
+        borderBottom="1px solid white"
+        focusBorderColor="white.900"
+        borderRadius={0}
+        mb={5}
+      />
           
           <Button
             type="submit"

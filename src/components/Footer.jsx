@@ -1,20 +1,21 @@
 import { Box, Flex, Stack, Text, Link, Heading, Input, Button, HStack } from "@chakra-ui/react";
-import { FaGithub, FaLinkedin, FaTwitter } from "react-icons/fa";
+import { FaGithub, FaLinkedin, FaTelegram, FaTwitter } from "react-icons/fa";
 import VanishInput from "./ui/VanishInput";
 
 
 export default function Footer() {
   const links = [
-    { name: "Home", href: "/" },
-    { name: "About", href: "/about" },
-    { name: "Projects", href: "/projects" },
-    { name: "Contact", href: "/contact" },
+    { name: "Home", href: "#/" },
+    { name: "About", href: "#/about" },
+    { name: "Projects", href: "#/projects" },
+    { name: "Contact", href: "#/contact" },
   ];
 
   const socials = [
-    { icon: <FaGithub />, href: "https://github.com/yourusername" },
+    { icon: <FaGithub />, href: "https://github.com/zxd1385" },
     { icon: <FaLinkedin />, href: "https://linkedin.com/in/yourusername" },
     { icon: <FaTwitter />, href: "https://twitter.com/yourusername" },
+    { icon: <FaTelegram />, href: "t.me/zxd_Solenoid" },
   ];
 
   return (
@@ -30,10 +31,10 @@ export default function Footer() {
         {/* Brand */}
         <Box mb={{ base: 4, md: 0 }}>
           <Heading size="md" mb={2}>
-            John Doe
+            zxd 1385
           </Heading>
           <Text fontSize="sm" color="gray.400">
-            Building modern web experiences
+            Building modern research experiences
           </Text>
         </Box>
 
@@ -71,7 +72,7 @@ export default function Footer() {
       </Flex>
 
       <Text fontSize="sm" textAlign="center" color="gray.500">
-        © {new Date().getFullYear()} John Doe. All rights reserved.
+        © {new Date().getFullYear()} zxd1385. All rights reserved.
       </Text>
     </Box>
   );

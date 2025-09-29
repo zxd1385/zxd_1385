@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
-import { FaBars, FaTimes } from "react-icons/fa";
+import { FaBars, FaTimes, FaPlusCircle, FaProjectDiagram, FaEnvelope } from "react-icons/fa";
+import { Icon } from "@chakra-ui/react";
 
 
 export default function FloatingDock({ items }) {
@@ -32,7 +33,7 @@ export default function FloatingDock({ items }) {
                 style={{ ...styles.mobileItem }}
                 onClick={() => setMobileOpen(false)}
               >
-                {item.icon} {item.title}
+                <Icon as={item.icon} style={styles.icon} /> {item.title}
               </a>
             ))}
           </div>
@@ -61,7 +62,7 @@ export default function FloatingDock({ items }) {
             transition: "transform 0.2s",
           }}
         >
-          <div style={styles.icon}>{item.icon}</div>
+          <div style={styles.icon}><Icon as={item.icon} style={styles.icon} /></div>
           {hoveredIndex === idx && (
             <div style={styles.tooltip}>{item.title}</div>
           )}
@@ -123,6 +124,9 @@ const styles = {
     bottom: "16px",
     right: "16px",
     zIndex: 1000,
+    display: "flex",
+    alignItems: "end",
+    gap: "5px"
   },
   mobileToggle: {
     width: "36px",

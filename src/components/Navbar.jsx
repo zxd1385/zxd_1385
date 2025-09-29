@@ -1,11 +1,18 @@
 import React, { useState, useEffect } from "react";
-import { FaBars, FaTimes } from "react-icons/fa";
+import { Icon, Input, Box, Text } from "@chakra-ui/react";
+import { FaBars, FaTimes, FaHome, FaInfoCircle, FaProjectDiagram, FaNewspaper, FaEnvelope, FaSearch } from "react-icons/fa";
 import AuthButton from "./serverComponents/AuthButton";
+import { supabase } from "../lib/supabaseClient";
+import { useNavigate } from "react-router-dom";
 
 
 export default function Navbar() {
   const [isMobile, setIsMobile] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");  // State to hold the search query
+  const [searchResults, setSearchResults] = useState([]); 
+
+  const navigate = useNavigate()
 
   // handle window resize
   useEffect(() => {
@@ -16,22 +23,110 @@ export default function Navbar() {
   }, []);
 
   const navItems = [
-    { name: "Home", href: "#/" },
-    { name: "About", href: "#/about" },
-    { name: "Projects", href: "#/projects" },
-    { name: "Articles", href: "#/articles" },
-    { name: "Contact", href: "#/contact" },       // visible if logged in
-    { name: "Create Article", href: "#/creat-article" }, // visible if logged in
-    { name: "Create Project", href: "#/creat-project" }  // visible if logged in
+    { name: "Home", href: "#/", icon: FaHome },
+    { name: "About", href: "#/about", icon: FaInfoCircle },
+    { name: "Projects", href: "#/projects", icon: FaProjectDiagram },
+    { name: "Articles", href: "#/articles", icon: FaNewspaper },
+    { name: "Contact", href: "#/contact", icon: FaEnvelope }, // show if logged in
   ];
+
+  const handleBlur = () => {
+    // Clear search results after losing focus
+    setTimeout(() => {
+      setSearchQuery("");
+      setSearchResults([]);
+    }, 150); // small timeout to allow click on a result
+  };
+
+  
+  // Handle Search Query Change
+  const handleSearchChange = async (e) => {
+    const query = e.target.value;
+    setSearchQuery(query);
+    console.log(query);
+
+    if (query.length > 2) {
+      // Search articles
+      const { data: articlesData } = await supabase
+        .from("articles")
+        .select("id, title")
+        .eq('is_visible', true)
+        .ilike("title", `%${query}%`)
+        .limit(5);
+  
+      // Search projects
+      const { data: projectsData } = await supabase
+        .from("projects")
+        .select("id, title, description")
+        .eq('is_visible', true)
+        .ilike("title", `%${query}%`)
+        .limit(5);
+  
+      // Combine results
+      const combinedResults = [
+        ...(articlesData || []).map(item => ({ ...item, type: "article" })),
+        ...(projectsData || []).map(item => ({ ...item, type: "project" }))
+      ];
+  
+      setSearchResults(combinedResults);
+    } else {
+      setSearchResults([]);
+    }
+  };
   
 
   return (
     <nav style={styles.navbar}>
       <div style={styles.logo}>
         <span style={{ marginRight: "10px" }}>zxdClub</span>
-        <AuthButton />
       </div>
+
+      {/* Search Bar */}
+      <Box position="relative" display="flex" alignItems="center">
+        <Input
+          placeholder="Search Articles/Projects..."
+          value={searchQuery}
+          onChange={handleSearchChange}
+          onBlur={handleBlur}
+          size="sm"
+          width="200px"
+          color="#fff"
+          _focus={{ borderColor: "teal.300" }}
+          variant="outline"
+        />
+        <Icon as={FaSearch} position="absolute" right="8px" color="gray.400" />
+        
+        {/* Display Search Results */}
+        { searchResults.length > 0 ? (
+            <Box position="absolute" top="100%" left="0" width="100%" backgroundColor="gray.800" boxShadow="lg" borderRadius="5px">
+    {searchResults.map((result) => (
+      <Box
+        key={`${result.type}-${result.id}`}
+        padding="4px"
+        color="white"
+        cursor="pointer"
+        _hover={{ backgroundColor: "gray.700" }}
+        onClick={() => navigate(`/${result.type}/${result.id}`)} // navigate to correct page
+      >
+        <strong>{result.title}</strong>
+        <Text fontSize="xs" color="gray.400">{result.type.toUpperCase()}</Text>
+      </Box>
+    ))}
+            </Box>
+            ) : searchQuery && (
+              <Box position="absolute" top="100%" left="0" width="100%" backgroundColor="gray.800" boxShadow="lg" borderRadius="5px">
+                <Box
+        key={"nothing foun"}
+        padding="4px"
+        color="white"
+        cursor="pointer"
+        _hover={{ backgroundColor: "gray.700" }}
+      >
+        Noyhing found for "{searchQuery}"
+      </Box>
+            </Box>
+            )}
+      </Box>
       
 
       {isMobile ? (
@@ -51,9 +146,12 @@ export default function Navbar() {
                   style={styles.mobileMenuItem}
                   onClick={() => setMenuOpen(false)}
                 >
+                  <Icon as={item.icon} mr={2} /> 
                   {item.name}
                 </a>
               ))}
+              
+        <AuthButton />
             </div>
           )}
         </>
@@ -61,9 +159,11 @@ export default function Navbar() {
         <div style={styles.menu}>
           {navItems.map((item, idx) => (
             <a key={idx} href={item.href} style={styles.menuItem}>
+              <Icon as={item.icon} mr={2} /> 
               {item.name}
             </a>
           ))}
+          <AuthButton />
         </div>
       )}
     </nav>
@@ -91,6 +191,8 @@ const styles = {
   },
   menu: {
     display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
     gap: "1rem",
   },
   menuItem: {
@@ -108,9 +210,9 @@ const styles = {
   mobileMenu: {
     position: "absolute",
     top: "60px",
-    right: 0,
+    right: "10px",
     backgroundColor: "#1e1e1e",
-    width: "200px",
+    width: "240px",
     display: "flex",
     flexDirection: "column",
     padding: "1rem",

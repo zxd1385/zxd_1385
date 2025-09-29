@@ -29,6 +29,7 @@
     "gray-matter": "^4.0.3",
     "motion": "^12.23.15",
     "react": "^18.3.1",
+    "react-datepicker": "^8.7.0",
     "react-dom": "^18.3.1",
     "react-icons": "^5.5.0",
     "react-markdown": "^10.1.0",

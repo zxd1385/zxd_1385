@@ -1,4 +1,5 @@
 import { Routes, Route } from "react-router-dom";
+import { FaPlusCircle, FaProjectDiagram, FaEnvelope } from "react-icons/fa";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import AnimatedGradientBackground from "./components/ui/GlobalVortexBackground"
@@ -26,10 +27,9 @@ function App() {
       <Navbar  />
       <FloatingDock
         items={[
-          { title: "Home", href: "/#", icon: "🏠" },
-          { title: "Projects", href: "/#projects", icon: "💻" },
-          { title: "Articles", href: "/#articles", icon: "📝" },
-          { title: "Contact", href: "/#contact", icon: "✉️" },       // only for logged-in users
+          { title: "Create Article", href: "/#creat-article", icon: FaPlusCircle },
+          { title: "Create Project", href: "/#creat-project", icon: FaProjectDiagram },
+          { title: "Contact", href: "/#contact", icon: FaEnvelope }, // only for logged-in users
         ]}
       />
 

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Box, Heading, Text, Image, Button, Link, VStack, HStack, Flex } from '@chakra-ui/react';
+import { Box, Heading, Text, Image, Button, Link, VStack, HStack, Flex, Avatar } from '@chakra-ui/react';
 import { supabase } from '../lib/supabaseClient';
 import MarkdownRenderer from '../components/serverComponents/MarkDownRenderer';
 
@@ -12,7 +12,14 @@ const ProjectPage = () => {
     const fetchProject = async () => {
       const { data, error } = await supabase
         .from('projects')
-        .select('*')
+        .select(`
+          *,
+          profiles (
+            avatar_url,
+            name,
+            website
+          )
+        `)
         .eq('id', id)
         .single(); // Fetch the project by ID
 
@@ -62,6 +69,23 @@ const ProjectPage = () => {
           )}
 
           <HStack justify="space-between" fontSize="sm" color="gray.400">
+          <HStack alignItems="start">
+                <Avatar.Root size="lg"  borderRadius="50%">
+                  <Avatar.Image
+                    src={project.profiles.avatar_url}
+                    
+                  />
+                  <Avatar.Fallback name={project.profiles.avatar_url || "Unknown"} />
+                </Avatar.Root>
+                <VStack>
+                <Text fontSize="sm" color="gray.500">
+                  {project.profiles.name || "Unknown Author"}
+                </Text>
+                <Text fontSize="xs" color="gray.500">
+                  Custom website: {project.profiles.website || "Unknown"}
+                </Text>
+                </VStack>
+          </HStack>
             <Text>Created at: {new Date(project.created_at).toLocaleDateString()}</Text>
           </HStack>
 

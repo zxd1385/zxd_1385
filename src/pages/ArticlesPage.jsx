@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Box, Heading, Text, Button, Stack, Card, Avatar } from "@chakra-ui/react";
+import { Box, Heading, Text, Button, Stack, Card, Avatar, HStack } from "@chakra-ui/react";
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient';
 import LoadingScreen from '../components/ui/Loading';
@@ -12,15 +12,33 @@ const ArticlesPage = () => {
   useEffect(() => {
     const fetchArticles = async () => {
       setLoading(true);
+    
       const { data, error } = await supabase
         .from('articles')
-        .select('*')
+        .select(`
+          id,
+          title,
+          short_description,
+          created_at,
+          publisher_id,
+          profiles (
+            avatar_url,
+            name
+          )
+        `)
         .eq('is_visible', true)
         .order('created_at', { ascending: false });
-
-      if (!error) setArticles(data);
+    
+      if (error) {
+        console.error(error);
+      } else {
+        console.log(data); // Each article will now have a "profiles" object
+        setArticles(data);
+      }
+    
       setLoading(false);
     };
+    
 
     fetchArticles();
   }, []);
@@ -50,12 +68,7 @@ const ArticlesPage = () => {
               transition="all 0.2s"
             >
               <Card.Body gap="2">
-                <Avatar.Root size="lg" shape="rounded">
-                  <Avatar.Image
-                    src={`https://api.dicebear.com/7.x/initials/svg?seed=${article.author_name || "A"}`}
-                  />
-                  <Avatar.Fallback name={article.author_name || "Unknown"} />
-                </Avatar.Root>
+                
                 <Card.Title mb="2" color="teal.200">
                   {article.title}
                 </Card.Title>
@@ -64,11 +77,20 @@ const ArticlesPage = () => {
                 </Card.Description>
               </Card.Body>
               <Card.Footer justifyContent="space-between">
-                <Text fontSize="sm" color="gray.500">
-                  {article.author_name || "Unknown Author"}
+                <HStack >
+                <Avatar.Root size="lg"  borderRadius="50%">
+                  <Avatar.Image
+                    src={article.profiles.avatar_url}
+                    
+                  />
+                  <Avatar.Fallback name={article.profiles.avatar_url || "Unknown"} />
+                </Avatar.Root>
+                <Text fontSize="xs" color="gray.500">
+                  {article.profiles.name || "Unknown Author"}
                 </Text>
+                </HStack>
                 <Button
-                  size="sm"
+                  size="xs"
                   colorScheme="teal"
                   onClick={() => navigate(`/article/${article.id}`)}
                 >
