@@ -73,10 +73,10 @@ function Home() {
       initial={{ opacity: 0, scale: 0.8 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.8, delay: 0.3 }}
-      mt={{ base: 6, md: 0 }} // margin top on mobile for spacing
+      mt={{ base: 3, md: 0 }} // margin top on mobile for spacing
     >
       <PixelatedCanvas
-        src="https://vklkbmottirkmhyuuqce.supabase.co/storage/v1/object/public/project-images/public/myimg.jpg" 
+        src="https://vklkbmottirkmhyuuqce.supabase.co/storage/v1/object/public/project-images/public/photo_5969898782621551432_x.jpg" 
         width={width}
         height={height}
         cellSize={3}
@@ -114,6 +114,7 @@ function Home() {
         colorScheme="teal"
         size={{ base: "md", md: "lg" }}
         _hover={{ transform: "scale(1.05)" }}
+        onClick={() => navigate("/articles")}
       >
         View My Work
       </Button>
@@ -154,14 +155,7 @@ function Home() {
               borderRadius="lg"
               overflow="hidden"
             >
-              <Image
-                src={slide.img}
-                alt={slide.title}
-                objectFit="cover"
-                w="100%"
-                h="100%"
-                filter="brightness(60%)"
-              />
+              
               <VStack
                 position="absolute"
                 top="50%"
