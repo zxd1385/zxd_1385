@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import { Box, Heading, Text, Image, Button, Link, VStack, HStack, Flex, Avatar } from '@chakra-ui/react';
 import { supabase } from '../lib/supabaseClient';
 import MarkdownRenderer from '../components/serverComponents/MarkDownRenderer';
+import LoadingScreen from '../components/ui/Loading';
 
 const ProjectPage = () => {
   const { id } = useParams(); // Get project ID from the URL
@@ -33,7 +34,7 @@ const ProjectPage = () => {
     fetchProject();
   }, [id]);
 
-  if (!project) return <Text>Loading...</Text>;
+  if (!project) return <LoadingScreen type='Project' padd={40} />;
 
   return (
     <Flex
@@ -89,8 +90,11 @@ const ProjectPage = () => {
             <Text>Created at: {new Date(project.created_at).toLocaleDateString()}</Text>
           </HStack>
 
-          <Box>
-            <MarkdownRenderer content={project.description} />
+          <Box
+          dangerouslySetInnerHTML={{ __html: project.description }}
+          padding={3}
+          mt={4}
+          >
           </Box>
 
           {project.pdf_url && (

@@ -1,16 +1,18 @@
 import React, { useState, useEffect } from "react";
-import { Icon, Input, Box, Text } from "@chakra-ui/react";
+import { Icon, Input, Box, Text, Spinner} from "@chakra-ui/react";
 import { FaBars, FaTimes, FaHome, FaInfoCircle, FaProjectDiagram, FaNewspaper, FaEnvelope, FaSearch } from "react-icons/fa";
 import AuthButton from "./serverComponents/AuthButton";
 import { supabase } from "../lib/supabaseClient";
 import { useNavigate } from "react-router-dom";
+import LoadingScreen from "./ui/Loading";
 
 
 export default function Navbar() {
   const [isMobile, setIsMobile] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");  // State to hold the search query
-  const [searchResults, setSearchResults] = useState([]); 
+  const [searchResults, setSearchResults] = useState([]);
+  const [isSearching, setIsSearching] = useState(false) 
 
   const navigate = useNavigate()
 
@@ -42,6 +44,7 @@ export default function Navbar() {
   // Handle Search Query Change
   const handleSearchChange = async (e) => {
     const query = e.target.value;
+    setIsSearching(true)
     setSearchQuery(query);
     console.log(query);
 
@@ -72,6 +75,8 @@ export default function Navbar() {
     } else {
       setSearchResults([]);
     }
+
+    setIsSearching(false)
   };
   
 
@@ -94,7 +99,8 @@ export default function Navbar() {
           _focus={{ borderColor: "teal.300" }}
           variant="outline"
         />
-        <Icon as={FaSearch} position="absolute" right="8px" color="gray.400" />
+        {isSearching ? <Spinner position="absolute" right="8px" color="gray.400" />
+        : <Icon as={FaSearch} position="absolute" right="8px" color="gray.400" />}
         
         {/* Display Search Results */}
         { searchResults.length > 0 ? (

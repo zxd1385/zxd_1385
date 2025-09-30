@@ -5,11 +5,23 @@ import { motion } from 'framer-motion';
 import { supabase } from '../lib/supabaseClient';
 import MarkdownRenderer from '../components/serverComponents/MarkDownRenderer';
 import DigitalCountdown from '../components/ui/DigitalCowntdown';
+import LoadingScreen from '../components/ui/Loading';
+import LikeDislike from '../components/serverComponents/LikeDislike';
 
 const ArticlePage = () => {
   const { id } = useParams();
   const [article, setArticle] = useState(null);
   const [isPublished, setIsPublished] = useState(true);
+  const [session, setSession] = useState(null);
+
+useEffect(() => {
+  const getSession = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    setSession(session);
+  };
+  getSession();
+}, []);
+
 
   useEffect(() => {
     const fetchArticle = async () => {
@@ -45,7 +57,7 @@ const ArticlePage = () => {
     fetchArticle();
   }, [id]);
 
-  if (!article) return <Text>Loading...</Text>;
+  if (!article) return <LoadingScreen type='Article' padd={40} />;
 
   return (
     <Flex
@@ -122,11 +134,15 @@ const ArticlePage = () => {
             </Box>
             </Box>
           ) : (
-            <Box mt={4}>
-              <MarkdownRenderer content={article.body} />
+            <Box
+             mt={4}
+             dangerouslySetInnerHTML={{ __html: article.body }}>
+              
             </Box>
+            
           )}
 
+<LikeDislike articleId={article.id} session={session} />
           
         </VStack>
       </Box>
@@ -191,12 +207,12 @@ function CustomCountdown({ targetDate, isLoading }) {
       {!isLoading ? (
         <HStack spacing={6} position="relative">
           {/* dot seperators */}
-          <Box position="absolute" top="20px" left="99px" bg="white" width="6px" height="6px" borderRadius="50%"></Box>
-          <Box position="absolute" top="50px" left="99px" bg="white" width="6px" height="6px" borderRadius="50%"></Box>
-          <Box position="absolute" top="20px" left="209px" bg="white" width="6px" height="6px" borderRadius="50%"></Box>
-          <Box position="absolute" top="50px" left="209px" bg="white" width="6px" height="6px" borderRadius="50%"></Box>
-          <Box position="absolute" top="20px" left="318px" bg="white" width="6px" height="6px" borderRadius="50%"></Box>
-          <Box position="absolute" top="50px" left="318px" bg="white" width="6px" height="6px" borderRadius="50%"></Box>
+          <Box position="absolute" top="14px" left="60px" bg="white" width="6px" height="6px" borderRadius="50%"></Box>
+          <Box position="absolute" top="35px" left="60px" bg="white" width="6px" height="6px" borderRadius="50%"></Box>
+          <Box position="absolute" top="14px" left="132px" bg="white" width="6px" height="6px" borderRadius="50%"></Box>
+          <Box position="absolute" top="35px" left="132px" bg="white" width="6px" height="6px" borderRadius="50%"></Box>
+          <Box position="absolute" top="35px" left="205px" bg="white" width="6px" height="6px" borderRadius="50%"></Box>
+          <Box position="absolute" top="14px" left="205px" bg="white" width="6px" height="6px" borderRadius="50%"></Box>
           
           <VStack mr={2}>
             {}

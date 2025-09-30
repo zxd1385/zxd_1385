@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Box, Heading, Input, Textarea, Button, VStack, Text } from '@chakra-ui/react';
+import { Box, Heading, Input, Textarea, Button, VStack, Text, Spinner } from '@chakra-ui/react';
 import { supabase } from '../lib/supabaseClient';
+import { LuCheck } from 'react-icons/lu';
+import ReactQuill from 'react-quill';
 
 const CreateProjectPage = () => {
   const navigate = useNavigate();
@@ -13,10 +15,19 @@ const CreateProjectPage = () => {
   const [imageFile, setImageFile] = useState(null);
   const [pdfFile, setPdfFile] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [submitLoading, setSubmitLoading] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
+
+  const [errors, setErrors] = useState({
+    title: '',
+    description: '',
+    imageFile: '',
+    pdfFile: ''
+  });
+
   const [existingImageUrl, setExistingImageUrl] = useState(null);
   const [existingPdfUrl, setExistingPdfUrl] = useState(null);
 
-  // Fetch session and existing project (if editing)
   useEffect(() => {
     const fetchSessionAndProject = async () => {
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
@@ -27,13 +38,11 @@ const CreateProjectPage = () => {
       setSession(session);
 
       if (id) {
-        // Fetch project data
         const { data, error } = await supabase
           .from('projects')
           .select('*')
           .eq('id', id)
           .single();
-
         if (error) {
           console.error('Error fetching project:', error);
         } else {
@@ -41,106 +50,110 @@ const CreateProjectPage = () => {
           setDescription(data.description);
           setExistingImageUrl(data.image_url || null);
           setExistingPdfUrl(data.pdf_url || null);
-          // Existing files won't be set as File objects; user can re-upload
         }
       }
     };
-
     fetchSessionAndProject();
   }, [id, navigate]);
 
+  const validateFields = () => {
+    const newErrors = { title: '', description: '', imageFile: '', pdfFile: '' };
+    let isValid = true;
+
+    if (!title.trim()) {
+      newErrors.title = 'Title is required';
+      isValid = false;
+    }
+    if (!description.trim()) {
+      newErrors.description = 'Description is required';
+      isValid = false;
+    }
+    if (imageFile && !['image/png', 'image/jpeg', 'image/jpg'].includes(imageFile.type)) {
+      newErrors.imageFile = 'Only PNG/JPG images are allowed';
+      isValid = false;
+    }
+    if (pdfFile && pdfFile.type !== 'application/pdf') {
+      newErrors.pdfFile = 'Only PDF files are allowed';
+      isValid = false;
+    }
+
+    setErrors(newErrors);
+    return isValid;
+  };
+
   const handleSaveProject = async () => {
+    if (!validateFields()) return;
+
     if (!session) return;
     setLoading(true);
+    setSubmitLoading(true);
+    setIsSubmitted(false);
 
-    let imageUrl = null;
-    let pdfUrl = null;
+    let imageUrl = existingImageUrl;
+    let pdfUrl = existingPdfUrl;
 
     // Upload image
     if (imageFile) {
-        // Remove old image first
-        if (existingImageUrl) {
-          const oldPath = existingImageUrl.split('/').pop(); // get filename from URL
-          await supabase.storage.from('project-images').remove([`public/${oldPath}`]);
-        }
-      const { data: uploadData, error: uploadError } = await supabase.storage
+      if (existingImageUrl) {
+        const oldPath = existingImageUrl.split('/').pop();
+        await supabase.storage.from('project-images').remove([`public/${oldPath}`]);
+      }
+      const { error: uploadError } = await supabase.storage
         .from('project-images')
         .upload(`public/${imageFile.name}`, imageFile);
 
       if (uploadError) {
-        console.error('Image upload error:', uploadError);
+        setErrors(prev => ({ ...prev, imageFile: uploadError.message }));
         setLoading(false);
         return;
       }
-
-      imageUrl = supabase.storage
-        .from('project-images')
-        .getPublicUrl(`public/${imageFile.name}`).data.publicUrl;
+      imageUrl = supabase.storage.from('project-images').getPublicUrl(`public/${imageFile.name}`).data.publicUrl;
     }
 
     // Upload PDF
     if (pdfFile) {
-
-        if (existingPdfUrl) {
-            const oldPath = existingPdfUrl.split('/').pop();
-            await supabase.storage.from('project-pdfs').remove([`public/${oldPath}`]);
-          }
-      const { data: uploadData, error: uploadError } = await supabase.storage
+      if (existingPdfUrl) {
+        const oldPath = existingPdfUrl.split('/').pop();
+        await supabase.storage.from('project-pdfs').remove([`public/${oldPath}`]);
+      }
+      const { error: uploadError } = await supabase.storage
         .from('project-pdfs')
         .upload(`public/${pdfFile.name}`, pdfFile);
 
       if (uploadError) {
-        console.error('PDF upload error:', uploadError);
+        setErrors(prev => ({ ...prev, pdfFile: uploadError.message }));
         setLoading(false);
         return;
       }
-
-      pdfUrl = supabase.storage
-        .from('project-pdfs')
-        .getPublicUrl(`public/${pdfFile.name}`).data.publicUrl;
+      pdfUrl = supabase.storage.from('project-pdfs').getPublicUrl(`public/${pdfFile.name}`).data.publicUrl;
     }
 
-    // Prepare project data
     const projectData = {
       title,
       description,
       publisher_id: session.user.id,
-      image_url: imageFile
-        ? supabase.storage.from('project-images').getPublicUrl(`public/${imageFile.name}`).data.publicUrl
-        : existingImageUrl,
-
-      pdf_url: pdfFile
-        ? supabase.storage.from('project-pdfs').getPublicUrl(`public/${pdfFile.name}`).data.publicUrl
-        : existingPdfUrl,
-        is_visible: false
-
+      image_url: imageUrl,
+      pdf_url: pdfUrl,
+      is_visible: false
     };
 
     let errorInsert;
     if (id) {
-      // Update existing project
-      const { error } = await supabase
-        .from('projects')
-        .update(projectData)
-        .eq('id', id);
+      const { error } = await supabase.from('projects').update(projectData).eq('id', id);
       errorInsert = error;
     } else {
-      // Insert new project
-      const { error } = await supabase
-        .from('projects')
-        .insert([projectData])
-        .single();
+      const { error } = await supabase.from('projects').insert([projectData]).single();
       errorInsert = error;
     }
 
     if (errorInsert) {
       console.error('Error saving project:', errorInsert);
     } else {
-      alert(id ? 'Project updated successfully!' : 'Project created successfully!');
-      navigate('/dashboard'); // redirect after save
+      setIsSubmitted(true);
     }
 
     setLoading(false);
+    setSubmitLoading(false);
   };
 
   return (
@@ -158,45 +171,50 @@ const CreateProjectPage = () => {
           borderBottom="1px solid white"
           focusBorderColor="white.900"
           borderRadius={0}
-          mb={6}
+          mb={1}
         />
+        {errors.title && <Text color="red.400">{errors.title}</Text>}
+
         <Text color="gray.300">Project Description</Text>
-        <Textarea
-          placeholder="Project Description"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          isRequired
-          variant="filled"
-          color="gray.300"
-          border="1px solid white"
-          focusBorderColor="white.900"
-          borderRadius={5}
-          mb={5}
-        />
+        <ReactQuill
+            value={description}
+            onChange={setDescription}
+            theme="snow"
+            placeholder="Write your article..."
+            style={{ color: 'gray' }} // This applies to the container, may not affect text fully
+          />
+        {errors.description && <Text color="red.400">{errors.description}</Text>}
+
         <Box mb={5}>
           <Text color="gray.300" mb={1}>Upload Image (optional)</Text>
           {existingImageUrl && !imageFile && (
-            <Box mb={2}>
-              <img src={existingImageUrl} alt="Current Project" style={{ maxWidth: '100%' }} />
-            </Box>
+            <Box mb={2}><img src={existingImageUrl} alt="Current Project" style={{ maxWidth: '100%' }} /></Box>
           )}
-          <Input type="file" accept="image/*" onChange={(e) => setImageFile(e.target.files[0])} color="gray.300" />
+          <Input
+            type="file"
+            accept="image/*"
+            onChange={(e) => setImageFile(e.target.files[0])}
+            color="gray.300"
+          />
+          {errors.imageFile && <Text color="red.400">{errors.imageFile}</Text>}
         </Box>
-      
+
         <Box>
           <Text color="gray.300" mb={1}>Upload PDF (optional)</Text>
           {existingPdfUrl && !pdfFile && (
-            <Box mb={2}>
-              <a href={existingPdfUrl} target="_blank" rel="noopener noreferrer">
-                View current PDF
-              </a>
-            </Box>
+            <Box mb={2}><a href={existingPdfUrl} target="_blank" rel="noopener noreferrer">View current PDF</a></Box>
           )}
-          <Input type="file" accept="application/pdf" onChange={(e) => setPdfFile(e.target.files[0])} color="gray.300" />
+          <Input
+            type="file"
+            accept="application/pdf"
+            onChange={(e) => setPdfFile(e.target.files[0])}
+            color="gray.300"
+          />
+          {errors.pdfFile && <Text color="red.400">{errors.pdfFile}</Text>}
         </Box>
 
         <Button colorScheme="blue" onClick={handleSaveProject} isLoading={loading}>
-          {id ? 'Update Project' : 'Save Project'}
+          {id ? 'Update Project' : 'Save Project'} {submitLoading ? <Spinner /> : isSubmitted ? <LuCheck /> : ""}
         </Button>
       </VStack>
     </Box>

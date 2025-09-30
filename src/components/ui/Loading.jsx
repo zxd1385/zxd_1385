@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 
 const MotionBox = motion(Box);
 
-export default function LoadingScreen() {
+export default function LoadingScreen({type="", padd=2 }) {
   const [show, setShow] = useState(false);
 
   // Small delay before showing loading screen for smoother UX
@@ -19,7 +19,7 @@ export default function LoadingScreen() {
         display="flex"
         alignItems="center"
         justifyContent="center"
-        padding={20}
+        padding={padd}
         _dark={{ bg: "gray.800" }}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -41,7 +41,7 @@ export default function LoadingScreen() {
             transition={{ duration: 1.5, repeat: Infinity }}
           >
             <Text fontSize="lg" fontWeight="medium" color="gray.600" _dark={{ color: "gray.300" }}>
-              Loading...
+              Loading {type}...
             </Text>
           </motion.div>
         </VStack>

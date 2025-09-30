@@ -6,13 +6,14 @@ import {
   Stack,
   VStack,
   Image,
+  HStack
+  
   
 } from "@chakra-ui/react";
 import '../index.css';
 import 'swiper/css';
 import 'swiper/css/pagination';
 import 'swiper/css/navigation';
-
 import { motion } from "framer-motion";
 import { PixelatedCanvas } from "../components/PixelatedCanvas";
 import { useResponsiveSizes } from "../custom-js/useResponsiveSizes";
@@ -22,13 +23,21 @@ import { Pagination, Navigation, HashNavigation } from 'swiper/modules';
 import TopArticles from "../components/serverComponents/TopArticles";
 import TopProjects from "../components/serverComponents/TopProjects";
 import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { supabase } from "../lib/supabaseClient";
+import { LuHand } from "react-icons/lu";
+import { FaRegHandPaper, FaSmile, FaInfoCircle  } from "react-icons/fa";
+
 
 const MotionBox = motion(Box);
 
 function Home() {
+  const [message, setMessage] = useState('');
+  const [show, setShow] = useState(false);
+  const [icon, setIcon] = useState(null);
   const navigate = useNavigate();
-    const { width, height } = useResponsiveSizes();
-    const slides = [
+  const { width, height } = useResponsiveSizes();
+  const slides = [
       {
         title: "Welcome to Our Website",
         text: "Explore amazing articles, insights, and much more to expand your knowledge.",
@@ -48,14 +57,79 @@ function Home() {
         nv: "/login"
       },
     ];
+    useEffect(() => {
+      const checkProfile = async () => {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) {
+          setMessage("Haven’t logged in yet? Please login.");
+          setIcon(<FaInfoCircle />)
+          setShow(true);
+          setTimeout(() => setShow(false), 4000);
+          return;
+        }
+  
+        const { data, error } = await supabase
+          .from('profiles') // Assuming your profile table is called 'profiles'
+          .select('name')
+          .eq('id', session.user.id) // Replace with the correct user ID column
+          .single();
+  
+        if (error) {
+          console.error('Error fetching profile:', error);
+        } else {
+          if (data) {
+            // If profile exists, greet user by name
+            setMessage(`Hey ${data.name}!\nWelcome back...`);
+            setIcon(<FaRegHandPaper />)
+          } else {
+            // If profile doesn't exist
+            setMessage('Welcome Dear! Please complete your profile in dashboard.');
+            setIcon(<FaSmile />)
+          }
+        }
+  
+        setShow(true);
+        setTimeout(() => setShow(false), 4000); // Fade out after 4 seconds
+      };
+  
+      checkProfile();
+    }, []);
+
+
   return (
     <>
+    <Box
+  position="fixed"
+  top={{ base: 16, md: 16 }}        // 4 units on small screens, 16 units on medium+
+  left={{ base: 4, md: 40 }}       // 4 units on small screens, 40 units (~160px) on medium+
+  zIndex="banner"
+>
+  <motion.div
+    initial={{ opacity: 0 }}
+    animate={{ opacity: show ? 1 : 0 }}
+    transition={{ duration: 1 }}
+  >
+    <Box
+      bg="teal.500"
+      color="white"
+      px={4}
+      py={3}
+      borderRadius="md"
+      boxShadow="lg"
+    >
+      <HStack spacing={1} justify="start">
+        {icon}<Text fontWeight="bold">{message}</Text>
+      </HStack>
+    </Box>
+  </motion.div>
+    </Box>
+
     <Box
   minH="100vh"
   display="flex"
   alignItems="center"
   justifyContent="center"
-  px={{ base: 4, md: 6 }} // responsive padding
+  px={{ base: 2, md: 6 }} // responsive padding
 >
   <Stack
     direction={{ base: "column", md: "row" }} // column on mobile, row on desktop
@@ -107,8 +181,8 @@ function Home() {
         Hey, I'm <Text as="span" color="teal.400">zxd1385</Text>
       </Heading>
       <Text fontSize={{ base: "md", md: "lg" }} color="gray.600" mb={6}>
-        A passionate web developer building modern, responsive, and
-        user-friendly web experiences.
+        A passionate Electrical Engineering Student at Sharif University of Technology(EE-SUT) ...
+        <br />see my github->https://github.com/zxd1385
       </Text>
       <Button
         colorScheme="teal"

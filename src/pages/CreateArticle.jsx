@@ -1,22 +1,26 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Box, Button, Input, Textarea, VStack, Heading, Checkbox, Text } from '@chakra-ui/react';
+import { Box, Button, Input, VStack, Heading, Text, Spinner } from '@chakra-ui/react';
 import { supabase } from '../lib/supabaseClient';
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
+import { LuCheck } from 'react-icons/lu';
 
 const CreateArticle = () => {
-  const { id } = useParams(); // optional article id for editing
+  const { id } = useParams();
   const navigate = useNavigate();
   const [session, setSession] = useState(null);
-  const [authorName, setAuthorName] = useState("Uknown Author");
+  const [authorName, setAuthorName] = useState("Unknown Author");
   const [title, setTitle] = useState('');
   const [shortDesc, setShortDesc] = useState('');
   const [body, setBody] = useState('');
-  const [isVisible, setIsVisible] = useState(false);
-  const [publishTime, setPublishTime] = useState(false);
+  const [publishTime, setPublishTime] = useState('');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [submitLoading, setsubmitLoading] = useState(false);
+  const [isSubmited, setisSubmited] = useState(false);
+  const [errors, setErrors] = useState({});
 
-
+  // Fetch session
   useEffect(() => {
     const getSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
@@ -25,65 +29,73 @@ const CreateArticle = () => {
     getSession();
   }, []);
 
+  // Fetch author name
   useEffect(() => {
-    if (session?.user?.id) {
-      const fetchUserName = async () => {
-        const { data, error } = await supabase
-          .from("profiles")
-          .select("name")
-          .eq("id", session.user.id)
-          .single();
-  
-        if (!error && data) {
-          setAuthorName(data.name);
-        }
-      };
-      fetchUserName();
-    }
+    if (!session?.user?.id) return;
+    const fetchUserName = async () => {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("name")
+        .eq("id", session.user.id)
+        .single();
+      if (!error && data) setAuthorName(data.name);
+    };
+    fetchUserName();
   }, [session]);
-  
-  // Fetch article data if id exists
+
+  // Fetch article if editing
   useEffect(() => {
     if (!id) return;
-
     const fetchArticle = async () => {
       setLoading(true);
-      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-      if (sessionError || !session) {
-        setError('You must be logged in to edit an article.');
-        setLoading(false);
-        return;
-      }
-
       const { data, error } = await supabase
         .from('articles')
         .select('*')
         .eq('id', id)
         .single();
-
-      if (error) {
-        setError(error.message);
-      } else {
+      if (!error && data) {
         setTitle(data.title);
         setShortDesc(data.short_description);
         setBody(data.body);
-        setIsVisible(data.is_visible);
         setPublishTime(data.publish_time);
       }
       setLoading(false);
     };
-
     fetchArticle();
   }, [id]);
 
+  // Validation function
+  const validate = () => {
+    const newErrors = {};
+    if (!title.trim()) newErrors.title = 'Title is required';
+    else if (title.trim().length < 5) newErrors.title = 'Title must be at least 5 characters';
+
+    if (!shortDesc.trim()) newErrors.shortDesc = 'Short description is required';
+    else if (shortDesc.trim().length < 10) newErrors.shortDesc = 'Description must be at least 10 characters';
+
+    if (!body || body.replace(/<(.|\n)*?>/g, '').trim().length < 20)
+      newErrors.body = 'Article body must be at least 20 characters';
+
+    if (publishTime && isNaN(new Date(publishTime).getTime()))
+      newErrors.publishTime = 'Invalid date/time';
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!validate()) return;
+
     setLoading(true);
+    setsubmitLoading(true);
+    setisSubmited(false);
 
     const { data: { session }, error: sessionError } = await supabase.auth.getSession();
     if (sessionError || !session) {
-      setError('You must be logged in to submit an article.');
+      setErrors({ submit: 'You must be logged in to submit an article.' });
       setLoading(false);
+      setsubmitLoading(false);
       return;
     }
 
@@ -99,99 +111,71 @@ const CreateArticle = () => {
 
     let errorInsert;
     if (id) {
-      // Update existing article
-      const { error } = await supabase
-        .from('articles')
-        .update(articleData)
-        .eq('id', id);
+      const { error } = await supabase.from('articles').update(articleData).eq('id', id);
       errorInsert = error;
     } else {
-      // Insert new article
-      const { error } = await supabase
-        .from('articles')
-        .insert([articleData])
-        .single();
+      const { error } = await supabase.from('articles').insert([articleData]).single();
       errorInsert = error;
     }
 
-    if (errorInsert) {
-      setError(errorInsert.message);
-    } else {
-      alert(id ? 'Article updated successfully!' : 'Article submitted successfully!');
-      navigate('/dashboard'); // redirect back to dashboard or articles list
-    }
+    if (errorInsert) setErrors({ submit: errorInsert.message });
+    else setisSubmited(true);
 
     setLoading(false);
+    setsubmitLoading(false);
   };
 
   return (
     <Box p={8} maxW="600px" mx="auto">
       <Heading color="purple.500" mb={6}>{id ? 'Edit Article' : 'Write a New Article'}</Heading>
-      {error && <Box color="red.500">{error}</Box>}
+
+      {errors.submit && <Text color="red.400">{errors.submit}</Text>}
+
       <form onSubmit={handleSubmit}>
         <VStack spacing={4} align="stretch">
-        <Text color="gray.300">Article Title</Text>
+          <Text color="gray.300">Article Title</Text>
           <Input
             placeholder="Title"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            isRequired
-            variant="filled"
+            isInvalid={!!errors.title}
             color="gray.300"
-            borderBottom="1px solid white"
-            focusBorderColor="white.900"
-            borderRadius={0}
-            mb={5}
           />
-          <Text color="gray.300">Article Short Description</Text>
+          {errors.title && <Text color="red.400">{errors.title}</Text>}
+
+          <Text color="gray.300">Short Description</Text>
           <Input
             placeholder="Short Description"
             value={shortDesc}
             onChange={(e) => setShortDesc(e.target.value)}
-            isRequired
-            variant="filled"
+            isInvalid={!!errors.shortDesc}
             color="gray.300"
-            borderBottom="1px solid white"
-            focusBorderColor="white.900"
-            borderRadius={0}
-            mb={5}
           />
+          {errors.shortDesc && <Text color="red.400">{errors.shortDesc}</Text>}
+
           <Text color="gray.300">Article Body</Text>
-          <Textarea
-            placeholder="Body"
+          <ReactQuill
             value={body}
-            onChange={(e) => setBody(e.target.value)}
-            isRequired
-            variant="filled"
-            color="gray.300"
-            border="1px solid white"
-            focusBorderColor="white.900"
-            borderRadius={5}
-            rows={5}
-            mb={3}
+            onChange={setBody}
+            theme="snow"
+            placeholder="Write your article..."
+            style={{ color: 'gray' }} // This applies to the container, may not affect text fully
           />
 
-          {/* Publish Time Input (New Field) */}
-      <Text color="gray.300">Publish Time (Optional)</Text>
-      <Input
-        type="datetime-local"
-        onChange={(e) => setPublishTime(e.target.value)}
-        variant="filled"
-        color="gray.300"
-        borderBottom="1px solid white"
-        focusBorderColor="white.900"
-        borderRadius={0}
-        mb={5}
-      />
-          
-          <Button
-            type="submit"
-            colorScheme="blue"
-            isLoading={loading}
-            loadingText={id ? 'Updating...' : 'Submitting...'}
-            isFullWidth
-          >
-            {id ? 'Update Article' : 'Submit Article'}
+          {errors.body && <Text color="red.400">{errors.body}</Text>}
+
+          <Text color="gray.300">Publish Time (Optional)</Text>
+          <Input
+            type="datetime-local"
+            value={publishTime}
+            onChange={(e) => setPublishTime(e.target.value)}
+            isInvalid={!!errors.publishTime}
+            color="gray.300"
+          />
+          {errors.publishTime && <Text color="red.400">{errors.publishTime}</Text>}
+
+          <Button type="submit" colorScheme="blue" isFullWidth isLoading={loading}>
+            {id ? 'Update Article' : 'Submit Article'} {submitLoading ? <Spinner /> : isSubmited ? <LuCheck /> : ""}
           </Button>
         </VStack>
       </form>

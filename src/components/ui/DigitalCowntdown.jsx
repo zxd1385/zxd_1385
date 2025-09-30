@@ -36,8 +36,8 @@ const DigitalCountdown = ({ value = 10 }) => {
 
   const renderSegment = (active, isHorizontal) => (
     <Box
-      w={isHorizontal ? "30px" : "4px"}
-      h={isHorizontal ? "4px" : "30px"}
+      w={isHorizontal ? "20px" : "3px"}
+      h={isHorizontal ? "3px" : "20px"}
       bg={active ? "red.500" : "transparent"}
       borderRadius="2px"
     />
@@ -45,7 +45,7 @@ const DigitalCountdown = ({ value = 10 }) => {
 
   return (
     <Flex justify="center" align="center" >
-      <Flex gap="8px">
+      <Flex gap="3px">
         {digits.map((digitSegments, index) => (
           <Box
             key={index}
@@ -59,12 +59,12 @@ const DigitalCountdown = ({ value = 10 }) => {
               {renderSegment(digitSegments[0], true)}
             </Flex>
             {/* Middle segments */}
-            <Flex justify="center" gap="35px">
+            <Flex justify="center" gap="20px">
               {renderSegment(digitSegments[5])}
               {renderSegment(digitSegments[1])}
             </Flex>
             {/* Bottom segment */}
-            <Flex justify="center" gap="50px">
+            <Flex justify="center" gap="25px">
               {renderSegment(digitSegments[6], true)}
             </Flex>
             {/* Left and right segments */}

@@ -21,3 +21,52 @@
   height: 100%;
   object-fit: cover;
 }
+
+
+/* ck-editor */
+/* Background & text color */
+.ck-editor__editable_inline {
+  background-color: #2d3748 !important; /* Chakra gray.700 */
+  color: #e2e8f0 !important; /* Chakra gray.200 */
+}
+
+/* Toolbar color */
+.ck.ck-toolbar {
+  background-color: #1a202c !important; /* Chakra gray.900 */
+  border: none !important;
+}
+
+/* Button icons */
+.ck.ck-toolbar .ck-button .ck-icon {
+  color: #e2e8f0 !important;
+}
+.ck.ck-toolbar .ck-button:hover {
+  background-color: #2d3748 !important;
+}
+
+/* Border */
+.ck.ck-editor__main > .ck-editor__editable {
+  border: 1px solid #758bb3 !important; /* Chakra gray.600 */
+}
+
+.ck-editor__editable_inline {
+  min-height: 200px; /* like 5–6 rows */
+  max-height: 600px; /* optional */
+}
+
+
+/* in index.css or your component CSS lexical editor */
+.editor-input {
+  min-height: 200px;
+  padding: 10px;
+  border: 1px solid #fff;
+  border-radius: 5px;
+  background-color: #1a1a1a;
+  color: white;
+  font-size: 16px;
+}
+.editor-paragraph {
+  margin: 0;
+}
+
+
