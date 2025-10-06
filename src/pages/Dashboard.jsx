@@ -6,6 +6,7 @@ import LoadingScreen from '../components/ui/Loading';
 import { LuCheck, LuPen, LuX } from "react-icons/lu"
 import { FaGlobe, FaMapMarkerAlt, FaPhoneAlt, FaBirthdayCake } from 'react-icons/fa'; // Add the icons here
 import { IoPerson } from 'react-icons/io5'; // For role icon
+import UsersList from '../components/serverComponents/UsersList';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 
@@ -24,13 +25,14 @@ const Dashboard = () => {
   const [loadingArticles, setLoadingArticles] = useState(true);
   const [loadingProjects, setLoadingProjects] = useState(true);
   const [loadingAdminProjects, setLoadingAdminProjects] = useState(true);
-  const [loadingAdminArticles, setLoadingAdminArticles] = useState(true);
+  const [loadingAdminArticles, setLoadingAdminArticles] = useState(false);
   const [loadingAdminContacts, setLoadingAdminContacts] = useState(true);
   const [submitLoading, setSubmitLoading] = useState(false)
   const [approvingId, setApprovingId] = useState(null);
   const [editMode, setEditMode] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [endDate, setEndDate] = useState(null);
+  const [saveError, setSaveError] = useState(null);
   const [startDate, setStartDate] = useState(null);
   const [formErrors, setFormErrors] = useState({});
   const [formData, setFormData] = useState({
@@ -77,11 +79,30 @@ const Dashboard = () => {
     };
 
     const fetchProfile = async (userId) => {
+      const { count, error: countError } = await supabase
+      .from('profiles')
+      .select('id', { count: 'exact', head: true })
+      .eq('id', userId);
+      if (countError) {
+        console.error("Error checking profile existence:", countError);
+        setLoadingProfile(false);
+        return;
+      }
+    
+      // Step 2: If no row → show create form
+      if (count === 0) {
+        console.log("No profile row found. Show create form.");
+        setProfile(null);
+        setLoadingProfile(false);
+        return;
+      }
+
+
         const { data, error } = await supabase
           .from('profiles')
           .select('*')
           .eq('id', userId)
-          .single();
+          .maybeSingle();
         
         if (error && error.code !== 'PGRST116') console.error('Error fetching profile:', error);
       
@@ -98,10 +119,14 @@ const Dashboard = () => {
             date_of_birth: data.date_of_birth || '',
             role: data.role || ''
           });
+          setLoading(false);
+          setIsAdmin(data.role === 'admin');
+        } else {
+          setLoading(false);
+          setIsAdmin(false);
         }
       
-        setLoading(false);
-        setIsAdmin(data.role === 'admin');
+        
       };
       
 
@@ -149,15 +174,7 @@ const Dashboard = () => {
       setContacts(contactsData || []);
       setLoadingAdminContacts(false)
   
-      // Fetch all non-visible articles
-      const { data: pendingArticles, error: articlesError } = await supabase
-        .from('articles')
-        .select('*')
-        .eq('is_visible', false);
-  
-      if (articlesError) console.error('Error fetching pending articles:', articlesError);
-      setPendingArticles(pendingArticles || []);
-      setLoadingAdminArticles(false)
+      
   
       // Fetch all non-visible projects
       const { data: pendingProjects, error: projectsError } = await supabase
@@ -217,6 +234,8 @@ const isValidDateOfBirth = (dateOfBirth) => {
   
     if (error) {
       console.error('Error saving profile:', error);
+      setSaveError(error.message || "Something went wrong while saving.");
+      setSubmitLoading(false)
       return;
     }
   
@@ -335,6 +354,17 @@ const isValidDateOfBirth = (dateOfBirth) => {
 
       { loadingProfile ? (<LoadingScreen type='Profile' padd={40} />) : !profile || editMode ? (
         <VStack spacing={5} align="stretch">
+          {saveError && (
+            <Alert.Root status={"error"}>
+            <Alert.Indicator />
+            <Alert.Content>
+              <Alert.Title ><strong>Error Saving Profile</strong></Alert.Title>
+              <Alert.Description>
+              {saveError}
+             </Alert.Description>
+            </Alert.Content>
+            </Alert.Root>
+          )}
         {/* Name */}
         <Text color="gray.300">Name:</Text>
         <Input
@@ -547,11 +577,11 @@ const isValidDateOfBirth = (dateOfBirth) => {
                   <Alert.Title>{article.title}</Alert.Title>
                   <Alert.Description>
                   {article.is_visible 
-                  ? "This article has been confirmed by admin" 
+                  ? "This article has been confirmed by zxdClub AI validation system" 
                   : "Pending article..."}
                     <HStack padding={1}>
                       <Button size="xs" onClick={() => navigate(`/edit-article/${article.id}`)}><LuPen />Edit</Button>
-                      <Button size="xs" colorScheme="red" onClick={() => handleDeleteArticle(article.id)}><LuX />Decline</Button>
+                      <Button size="xs" colorScheme="red" onClick={() => handleDeleteArticle(article.id)}><LuX />Delete</Button>
                     </HStack>
                   </Alert.Description>
                 </Alert.Content>
@@ -573,8 +603,8 @@ const isValidDateOfBirth = (dateOfBirth) => {
                   <Alert.Title>{project.title}</Alert.Title>
                   <Alert.Description>
                   {project.is_visible 
-                  ? "This article has been confirmed by admin" 
-                  : "Pending article..."}
+                  ? "This project has been confirmed by admin" 
+                  : "Pending project..."}
                     <HStack padding={1}>
                         <Button size="xs" onClick={() => navigate(`/edit-project/${project.id}`)}><LuPen />Edit</Button>
                         <Button size="xs" colorScheme="red" onClick={() => handleDeleteProject(project.id)}><LuX />Delet</Button>
@@ -598,6 +628,7 @@ const isValidDateOfBirth = (dateOfBirth) => {
     Admin Panel
   </Heading>
 
+<UsersList />
   {/* Date Range Filter */}
   <HStack mb={6} spacing={4} justify="center">
     <DatePicker
@@ -616,67 +647,13 @@ const isValidDateOfBirth = (dateOfBirth) => {
   />
   </HStack>
 
-  {/* Pending Articles Section */}
-  {loadingAdminArticles ? (<LoadingScreen type='Articles' />) :
-  (<Box mb={8}>
-    <Heading size="md" color="teal.200" mb={3}>Pending Articles</Heading>
-    {filteredArticles.length > 0 ? (
-      filteredArticles.map((a) => (
-        <Box mb={8}>
-  {filteredArticles.length > 0 ? (
-    filteredArticles.map((a) => (
-      <Box
-        key={a.id}
-        mb={3}
-        p={3}
-        borderWidth="1px"
-        borderRadius="md"
-        borderColor="gray.700"
-        _hover={{ bg: "gray.700" }}
-        transition="0.2s"
-      >
-        <Collapsible.Root unmountOnExit>
-          <Collapsible.Trigger>
-            <Text fontWeight="bold" color="teal.300" cursor="pointer">
-              {a.title} — By {a.author_name || "Unknown?"}
-            </Text>
-          </Collapsible.Trigger>
-          <Collapsible.Content>
-            <Box mt={2} p={3} borderWidth="1px" borderRadius="md" borderColor="gray.600" bg="gray.900">
-              <Text fontSize="sm" color="gray.100">{a.body}</Text>
-            </Box>
-          </Collapsible.Content>
-        </Collapsible.Root>
-
-        <Button
-          mt={2}
-          size="xs"
-          colorScheme="green"
-          onClick={() => approveArticle(a.id)}
-          _hover={{ transform: "scale(1.05)" }}
-          transition="0.2s"
-        >
-          {approvingId === a.id ? <Spinner size="xs" /> : <LuCheck />}
-          Approve
-        </Button>
-      </Box>
-    ))
-  ) : (
-    <Text fontSize="sm" color="gray.500">No pending articles in this date range.</Text>
-  )}
-</Box>
-      ))
-    ) : (
-      <Text fontSize="sm" color="gray.500">No pending articles in this date range.</Text>
-    )}
-  </Box>)
-  }
+  
   
 
 {/* Pending Projects Section */}
 {loadingAdminProjects ? (<LoadingScreen type='Projects' />) :
   (<Box>
-    <Heading size="md" color="teal.200" mb={3}>Pending Projects</Heading>
+    <Heading size="md" color="teal.200" mb={3}>Pending Team-Member Projects</Heading>
     {filteredProjects.length > 0 ? (
       filteredProjects.map((p) => (
         <Box

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Box, Button, Input, Textarea, VStack, Heading, Text, Spinner, Image } from '@chakra-ui/react';
 import { LuCheck } from 'react-icons/lu';
 import { supabase } from '../lib/supabaseClient';
+import { sendTextToAdmin } from '../custom-js/senTextToAdmin';
 
 const ContactForm = () => {
   const [formData, setFormData] = useState({
@@ -39,6 +40,8 @@ const ContactForm = () => {
 
     setLoading(true);
     const { error } = await supabase.from('contacts').insert([formData]);
+    const strToAdmin = `💬A new Contact us message has been sent to you!\nName: ${formData.name}\nEmail: ${formData.email}\nTelegram ID: ${formData.telegram_id}\nMessage: ${formData.idea}`
+    const sentText = await sendTextToAdmin(strToAdmin);
 
     if (error) {
       setErrors({ submit: error.message });

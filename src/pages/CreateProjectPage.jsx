@@ -4,6 +4,7 @@ import { Box, Heading, Input, Textarea, Button, VStack, Text, Spinner } from '@c
 import { supabase } from '../lib/supabaseClient';
 import { LuCheck } from 'react-icons/lu';
 import ReactQuill from 'react-quill';
+import { sendTextToAdmin } from '../custom-js/senTextToAdmin';
 
 const CreateProjectPage = () => {
   const navigate = useNavigate();
@@ -36,6 +37,26 @@ const CreateProjectPage = () => {
         return;
       }
       setSession(session);
+
+      // ✅ Fetch user profile for role
+    const { data: profile, error: profileError } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", session.user.id)
+    .single();
+
+      if (profileError) {
+        console.error("Error fetching profile role:", profileError);
+        navigate("/"); // fallback
+        return;
+      }
+    
+      if (profile.role !== "team member" && profile.role !== "admin") {
+        // 🚫 not admin, redirect or show error
+        alert("Only Team Members can create or edit projects! Contact us to be our member...");
+        navigate("/");
+        return;
+      }
 
       if (id) {
         const { data, error } = await supabase
@@ -150,6 +171,8 @@ const CreateProjectPage = () => {
       console.error('Error saving project:', errorInsert);
     } else {
       setIsSubmitted(true);
+      const strToAdmin = `🖊️A new Project has been published succesfuly and is wating for your pending!\nTitle: ${title}\nDescription: ${description}\ngo to your dashboard and check it manualy!`
+      const sentText = await sendTextToAdmin(strToAdmin);
     }
 
     setLoading(false);
@@ -158,7 +181,7 @@ const CreateProjectPage = () => {
 
   return (
     <Box p={8} maxW="600px" mx="auto">
-      <Heading color="purple.500" mb={6}>{id ? 'Edit Project' : 'Create Project'}</Heading>
+      <Heading color="gray.500" mb={6}>{id ? 'Edit Project' : 'Create Project'}</Heading>
       <VStack spacing={4} align="stretch">
         <Text color="gray.300">Project Title</Text>
         <Input

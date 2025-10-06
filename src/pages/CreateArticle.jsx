@@ -1,10 +1,15 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Box, Button, Input, VStack, Heading, Text, Spinner } from '@chakra-ui/react';
+import { Box, Button, Input, VStack, Heading, Text, Spinner, Alert } from '@chakra-ui/react';
 import { supabase } from '../lib/supabaseClient';
 import ReactQuill from 'react-quill';
+import ValidationProgress from '../components/ui/ValidationProgress';
 import 'react-quill/dist/quill.snow.css';
-import { LuCheck } from 'react-icons/lu';
+import { LuCheck} from 'react-icons/lu';
+import { validateWithServer } from '../custom-js/validationServerText';
+import { sendTextToAdmin } from '../custom-js/senTextToAdmin';
+import * as toxicity from '@tensorflow-models/toxicity';
+
 
 const CreateArticle = () => {
   const { id } = useParams();
@@ -16,9 +21,46 @@ const CreateArticle = () => {
   const [body, setBody] = useState('');
   const [publishTime, setPublishTime] = useState('');
   const [loading, setLoading] = useState(false);
+  const [titleValidation, settitleValidation] = useState(false);
+  const [titleErrors, settitleErrors] = useState('');
+  const [shortdescValidation, setshortdescValidation] = useState(false);
+  const [shortdescErrors, setshortdescErrors] = useState('');
+  const [bodyValidation, setbodyValidation] = useState(false);
+  const [bodyErrors, setbodyErrors] = useState('');
   const [submitLoading, setsubmitLoading] = useState(false);
   const [isSubmited, setisSubmited] = useState(false);
+  const [isSubmitedSucces, setisSubmitedSucces] = useState(false);
+  const [isfSubmited, setisfSubmited] = useState(false);
   const [errors, setErrors] = useState({});
+  const [toxicityErrors, setToxicityErrors] = useState({
+    title: [],
+    shortDesc: [],
+    body: []
+  });
+  
+
+
+  const threshold = 0.6; // probability threshold
+
+  const checkToxicity = async (text) => {
+    const threshold = 0.9; // high confidence
+    const model = await toxicity.load(threshold);
+    const predictions = await model.classify([text]);
+  
+    // Filter only matched categories
+    const flaggedCategories = predictions
+      .filter(p => p.results[0].match)
+      .map(p => p.label);
+  
+    return flaggedCategories; // array of strings like ['toxicity', 'insult']
+  };
+  
+  
+
+  
+  
+  
+  
 
   // Fetch session
   useEffect(() => {
@@ -84,12 +126,18 @@ const CreateArticle = () => {
   };
 
   const handleSubmit = async (e) => {
+
+    
+
+
+
     e.preventDefault();
     if (!validate()) return;
 
     setLoading(true);
     setsubmitLoading(true);
     setisSubmited(false);
+    setisSubmitedSucces(false)
 
     const { data: { session }, error: sessionError } = await supabase.auth.getSession();
     if (sessionError || !session) {
@@ -99,12 +147,87 @@ const CreateArticle = () => {
       return;
     }
 
+
+
+    // --- Check toxicity for title ---
+  // const titleFlags = await checkToxicity(title);
+  // const shortDescFlags = await checkToxicity(shortDesc);
+  // const cleanBody = body.replace(/<(.|\n)*?>/g, '');
+  // const bodyFlags = await checkToxicity(cleanBody);
+
+  // setToxicityErrors({
+  //   title: titleFlags,
+  //   shortDesc: shortDescFlags,
+  //   body: bodyFlags
+  // });
+
+  setisfSubmited(true);
+  settitleErrors('')
+  setbodyErrors('')
+  setshortdescErrors('')
+
+  // // If any field has toxic categories, stop submission
+  // if (titleFlags.length || shortDescFlags.length || bodyFlags.length) {
+  //   setLoading(false);
+  //   setsubmitLoading(false);
+  //   return; // stop
+  // }
+
+  settitleValidation(true)
+  const validation = await validateWithServer(`${title}`);
+  
+  if (validation.broadcast_ok === "NO") {
+    settitleErrors(validation.problems)
+    settitleValidation(false)
+    setsubmitLoading(false)
+    return; // ❌ stop submission
+  } else {
+    settitleErrors('z')
+  }
+
+  settitleValidation(false)
+
+
+  setshortdescValidation(true)
+  const svalidation = await validateWithServer(`${shortDesc}`);
+  
+  if (svalidation.broadcast_ok === "NO") {
+    setshortdescErrors(svalidation.problems)
+    setshortdescValidation(false)
+    setsubmitLoading(false)
+    return; // ❌ stop submission
+  }else{
+    setshortdescErrors('z')
+  }
+
+  setshortdescValidation(false)
+
+
+
+  setbodyValidation(true)
+  const bvalidation = await validateWithServer(`${body}`);
+  
+  if (bvalidation.broadcast_ok === "NO") {
+    setbodyErrors(bvalidation.problems)
+    setbodyValidation(false)
+    setsubmitLoading(false)
+    return; // ❌ stop submission
+  } else {
+    setbodyErrors('z')
+  }
+
+  setbodyValidation(false)
+  
+    
+  const iv = (titleErrors == 'z' && shortdescErrors == 'z' && bodyErrors == 'z') ? true : false;
+    console.log(iv);
+
     const articleData = {
       title,
       short_description: shortDesc,
       body,
       publisher_id: session.user.id,
-      is_visible: false,
+      is_visible: iv,
       author_name: authorName,
       publish_time: publishTime,
     };
@@ -119,15 +242,21 @@ const CreateArticle = () => {
     }
 
     if (errorInsert) setErrors({ submit: errorInsert.message });
-    else setisSubmited(true);
+    else {
+      setisSubmited(true)
+      const strToAdmin = `🖊️A new Article has been published succesfuly!\nTitle: ${title}\nShort Description: ${shortDesc}\ngo to site and check it manualy!`
+      const sentText = await sendTextToAdmin(strToAdmin);
+    };
 
     setLoading(false);
     setsubmitLoading(false);
+    setisSubmitedSucces(true)
+    
   };
 
   return (
     <Box p={8} maxW="600px" mx="auto">
-      <Heading color="purple.500" mb={6}>{id ? 'Edit Article' : 'Write a New Article'}</Heading>
+      <Heading color="gray.500" mb={6}>{id ? 'Edit Article' : 'Write a New Article'}</Heading>
 
       {errors.submit && <Text color="red.400">{errors.submit}</Text>}
 
@@ -164,7 +293,7 @@ const CreateArticle = () => {
 
           {errors.body && <Text color="red.400">{errors.body}</Text>}
 
-          <Text color="gray.300">Publish Time (Optional)</Text>
+          <Text color="gray.300">Publish Time </Text>
           <Input
             type="datetime-local"
             value={publishTime}
@@ -174,9 +303,21 @@ const CreateArticle = () => {
           />
           {errors.publishTime && <Text color="red.400">{errors.publishTime}</Text>}
 
+          
           <Button type="submit" colorScheme="blue" isFullWidth isLoading={loading}>
-            {id ? 'Update Article' : 'Submit Article'} {submitLoading ? <Spinner /> : isSubmited ? <LuCheck /> : ""}
+            {titleValidation ? 'Validating Title...' : shortdescValidation ? 'Validating Short Description' : bodyValidation ? 'Validating Body' : id ? 'Update Article' : 'Submit Article'} {submitLoading ? <Spinner /> : isSubmited ? <LuCheck /> : ""}
           </Button>
+          <ValidationProgress
+              titleValidation={titleValidation}
+              titleErrors={titleErrors}
+              shortdescValidation={shortdescValidation}
+              shortdescErrors={shortdescErrors}
+              bodyValidation={bodyValidation}
+              bodyErrors={bodyErrors}
+              isfSubmited={isfSubmited}
+           />
+          
+
         </VStack>
       </form>
     </Box>

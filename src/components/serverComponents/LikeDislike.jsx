@@ -83,11 +83,14 @@ export default function LikeDislike({ articleId, session }) {
       }
 
       // 3) Upsert new vote
-      await supabase.from("article_votes").upsert({
-        article_id: articleId,
-        user_id: userId,
-        vote: newVote,
-      });
+      await supabase.from("article_votes").upsert(
+        {
+          article_id: articleId,
+          user_id: userId,
+          vote: newVote,
+        },
+        { onConflict: ["article_id", "user_id"] }
+      );
 
       setVote(newVote);
     }

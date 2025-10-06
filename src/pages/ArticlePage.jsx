@@ -7,6 +7,7 @@ import MarkdownRenderer from '../components/serverComponents/MarkDownRenderer';
 import DigitalCountdown from '../components/ui/DigitalCowntdown';
 import LoadingScreen from '../components/ui/Loading';
 import LikeDislike from '../components/serverComponents/LikeDislike';
+import Comments from '../components/serverComponents/Comments';
 
 const ArticlePage = () => {
   const { id } = useParams();
@@ -134,15 +135,22 @@ useEffect(() => {
             </Box>
             </Box>
           ) : (
-            <Box
+            <VStack>
+              
+              <Box
              mt={4}
              dangerouslySetInnerHTML={{ __html: article.body }}>
               
             </Box>
+            <LikeDislike articleId={article.id} session={session} />
+            <Box mt={1}>
+              <Comments articleId={id} />
+            </Box>
+            </VStack>
             
           )}
 
-<LikeDislike articleId={article.id} session={session} />
+          
           
         </VStack>
       </Box>

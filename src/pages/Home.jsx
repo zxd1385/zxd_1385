@@ -75,16 +75,13 @@ function Home() {
           .single();
   
         if (error) {
-          console.error('Error fetching profile:', error);
+            setMessage('Welcome Dear! Please complete your profile in dashboard first.');
+            setIcon(<FaSmile />)
         } else {
           if (data) {
             // If profile exists, greet user by name
             setMessage(`Hey ${data.name}!\nWelcome back...`);
             setIcon(<FaRegHandPaper />)
-          } else {
-            // If profile doesn't exist
-            setMessage('Welcome Dear! Please complete your profile in dashboard.');
-            setIcon(<FaSmile />)
           }
         }
   
@@ -112,8 +109,8 @@ function Home() {
     <Box
       bg="teal.500"
       color="white"
-      px={4}
-      py={3}
+      px={1.5}
+      py={1.5}
       borderRadius="md"
       boxShadow="lg"
     >
@@ -188,7 +185,7 @@ function Home() {
         colorScheme="teal"
         size={{ base: "md", md: "lg" }}
         _hover={{ transform: "scale(1.05)" }}
-        onClick={() => navigate("/articles")}
+        onClick={() => navigate("/projects")}
       >
         View My Work
       </Button>
