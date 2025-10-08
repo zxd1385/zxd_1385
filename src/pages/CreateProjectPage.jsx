@@ -5,6 +5,9 @@ import { supabase } from '../lib/supabaseClient';
 import { LuCheck } from 'react-icons/lu';
 import ReactQuill from 'react-quill';
 import { sendTextToAdmin } from '../custom-js/senTextToAdmin';
+import { sendTelegramMessage } from '../custom-js/sendTelegramMessage';
+import { useRef } from "react";
+import { Editor } from "@tinymce/tinymce-react";
 
 const CreateProjectPage = () => {
   const navigate = useNavigate();
@@ -28,6 +31,14 @@ const CreateProjectPage = () => {
 
   const [existingImageUrl, setExistingImageUrl] = useState(null);
   const [existingPdfUrl, setExistingPdfUrl] = useState(null);
+
+  // tinyMCE cinfiguration...
+  const editorRef = useRef(null);
+  const logContent = () => {
+      if (editorRef.current) {
+        setDescription(editorRef.current.getContent());
+      }
+    };
 
   useEffect(() => {
     const fetchSessionAndProject = async () => {
@@ -155,7 +166,7 @@ const CreateProjectPage = () => {
       publisher_id: session.user.id,
       image_url: imageUrl,
       pdf_url: pdfUrl,
-      is_visible: false
+      is_visible: true
     };
 
     let errorInsert;
@@ -171,8 +182,11 @@ const CreateProjectPage = () => {
       console.error('Error saving project:', errorInsert);
     } else {
       setIsSubmitted(true);
-      const strToAdmin = `🖊️A new Project has been published succesfuly and is wating for your pending!\nTitle: ${title}\nDescription: ${description}\ngo to your dashboard and check it manualy!`
-      const sentText = await sendTextToAdmin(strToAdmin);
+      const state = id ? 'updated' : 'published'
+      const href = id ? `${import.meta.env.VITE_SITE_URL}/#/project/${id}` : `${import.meta.env.VITE_SITE_URL}/#/projects`
+      const strToAdmin = `🖊️A new <b>Project</b> has been ${state} succesfuly!\nTitle: <u>${title}</u>\n<a href="${href}">Read it here</a>`
+      console.log(strToAdmin);
+      const sentText = await sendTelegramMessage(strToAdmin);
     }
 
     setLoading(false);
@@ -194,21 +208,42 @@ const CreateProjectPage = () => {
           borderBottom="1px solid white"
           focusBorderColor="white.900"
           borderRadius={0}
-          mb={1}
+          mb={4}
         />
         {errors.title && <Text color="red.400">{errors.title}</Text>}
 
-        <Text color="gray.300">Project Description</Text>
-        <ReactQuill
-            value={description}
-            onChange={setDescription}
-            theme="snow"
-            placeholder="Write your article..."
-            style={{ color: 'gray' }} // This applies to the container, may not affect text fully
-          />
+        
+        
+       <Box >
+       <Text mb={2} color="gray.300">Project Description (Latex supported)</Text>
+       <Box textAlign="center">
+       <Editor
+        apiKey={import.meta.env.VITE_MCE_EDITOR_API_KEY}
+        onInit={(evt, editor) => (editorRef.current = editor)}
+        onChange={logContent}
+        initialValue={ description || "<p>Start creating something amazing...</p>"}
+        init={{
+          height: 300,
+          menubar: true,
+          plugins: [
+            "advlist autolink lists link image charmap print preview anchor",
+            "searchreplace visualblocks code fullscreen",
+            "insertdatetime media table paste code help wordcount",
+          ],
+          toolbar:
+            "undo redo | formatselect | bold italic backcolor | \
+            alignleft aligncenter alignright alignjustify | \
+            bullist numlist outdent indent | removeformat | help",
+        }}
+        
+      />
+       </Box>
+       </Box>
+  
+        
         {errors.description && <Text color="red.400">{errors.description}</Text>}
 
-        <Box mb={5}>
+        <Box mb={5} mt={34}>
           <Text color="gray.300" mb={1}>Upload Image (optional)</Text>
           {existingImageUrl && !imageFile && (
             <Box mb={2}><img src={existingImageUrl} alt="Current Project" style={{ maxWidth: '100%' }} /></Box>

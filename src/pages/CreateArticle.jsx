@@ -8,6 +8,9 @@ import 'react-quill/dist/quill.snow.css';
 import { LuCheck} from 'react-icons/lu';
 import { validateWithServer } from '../custom-js/validationServerText';
 import { sendTextToAdmin } from '../custom-js/senTextToAdmin';
+import { sendTelegramMessage } from '../custom-js/sendTelegramMessage';
+import { useRef } from "react";
+import { Editor } from "@tinymce/tinymce-react";
 import * as toxicity from '@tensorflow-models/toxicity';
 
 
@@ -39,6 +42,12 @@ const CreateArticle = () => {
   });
   
 
+  const editorRef = useRef(null);
+  const logContent = () => {
+    if (editorRef.current) {
+      setBody(editorRef.current.getContent());
+    }
+  };
 
   const threshold = 0.6; // probability threshold
 
@@ -219,15 +228,14 @@ const CreateArticle = () => {
   setbodyValidation(false)
   
     
-  const iv = (titleErrors == 'z' && shortdescErrors == 'z' && bodyErrors == 'z') ? true : false;
-    console.log(iv);
+  
 
     const articleData = {
       title,
       short_description: shortDesc,
       body,
       publisher_id: session.user.id,
-      is_visible: iv,
+      is_visible: true,
       author_name: authorName,
       publish_time: publishTime,
     };
@@ -244,8 +252,11 @@ const CreateArticle = () => {
     if (errorInsert) setErrors({ submit: errorInsert.message });
     else {
       setisSubmited(true)
-      const strToAdmin = `🖊️A new Article has been published succesfuly!\nTitle: ${title}\nShort Description: ${shortDesc}\ngo to site and check it manualy!`
-      const sentText = await sendTextToAdmin(strToAdmin);
+      const state = id ? 'updated' : 'published'
+      const href = id ? `${import.meta.env.VITE_SITE_URL}/#/article/${id}` : `${import.meta.env.VITE_SITE_URL}/#/articles`
+      const strToAdmin = `🖊️A new <b>Article</b> has been ${state} succesfuly!\nTitle: <u>${title}</u>\nShort Description: <i>${shortDesc}</i>\n<a href="${href}">Read it here</a>`
+      console.log(strToAdmin);
+      const sentText = await sendTelegramMessage(strToAdmin);
     };
 
     setLoading(false);
@@ -282,14 +293,31 @@ const CreateArticle = () => {
           />
           {errors.shortDesc && <Text color="red.400">{errors.shortDesc}</Text>}
 
-          <Text color="gray.300">Article Body</Text>
-          <ReactQuill
-            value={body}
-            onChange={setBody}
-            theme="snow"
-            placeholder="Write your article..."
-            style={{ color: 'gray' }} // This applies to the container, may not affect text fully
-          />
+          <Box >
+       <Text mb={2} color="gray.300">Article Body (Latex supported)</Text>
+       <Box textAlign="center">
+       <Editor
+        apiKey={import.meta.env.VITE_MCE_EDITOR_API_KEY}
+        onInit={(evt, editor) => (editorRef.current = editor)}
+        onChange={logContent}
+        initialValue={body || "<p>Start creating something amazing...</p>"}
+        init={{
+          height: 300,
+          menubar: true,
+          plugins: [
+            "advlist autolink lists link image charmap print preview anchor",
+            "searchreplace visualblocks code fullscreen",
+            "insertdatetime media table paste code help wordcount",
+          ],
+          toolbar:
+            "undo redo | formatselect | bold italic backcolor | \
+            alignleft aligncenter alignright alignjustify | \
+            bullist numlist outdent indent | removeformat | help",
+        }}
+        
+      />
+       </Box>
+       </Box>
 
           {errors.body && <Text color="red.400">{errors.body}</Text>}
 

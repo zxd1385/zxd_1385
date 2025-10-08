@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { Box, Heading, Text, Image, Button, Link, VStack, HStack, Flex, Avatar } from '@chakra-ui/react';
 import { supabase } from '../lib/supabaseClient';
@@ -8,6 +8,15 @@ import LoadingScreen from '../components/ui/Loading';
 const ProjectPage = () => {
   const { id } = useParams(); // Get project ID from the URL
   const [project, setProject] = useState(null);
+
+  const containerRef = useRef();
+
+  useEffect(() => {
+    if (window.MathJax) {
+      // tell MathJax to render math inside this container
+      window.MathJax.typesetPromise([containerRef.current]);
+    }
+  }, [project]);
 
   useEffect(() => {
     const fetchProject = async () => {
@@ -73,7 +82,7 @@ const ProjectPage = () => {
           <HStack alignItems="start">
                 <Avatar.Root size="lg"  borderRadius="50%">
                   <Avatar.Image
-                    src={project.profiles.avatar_url}
+                    src={project.profiles.avatar_url || `https://avatar.iran.liara.run/public/boy?username=${project.profiles.name}`}
                     
                   />
                   <Avatar.Fallback name={project.profiles.avatar_url || "Unknown"} />
@@ -91,6 +100,7 @@ const ProjectPage = () => {
           </HStack>
 
           <Box
+          ref={containerRef}
           dangerouslySetInnerHTML={{ __html: project.description }}
           padding={3}
           mt={4}

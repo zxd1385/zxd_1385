@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { Box, Heading, Text, VStack, HStack, Flex, Avatar } from '@chakra-ui/react';
 import { motion } from 'framer-motion';
@@ -23,6 +23,14 @@ useEffect(() => {
   getSession();
 }, []);
 
+const containerRef = useRef();
+
+  useEffect(() => {
+    if (window.MathJax) {
+      // tell MathJax to render math inside this container
+      window.MathJax.typesetPromise([containerRef.current]);
+    }
+  }, [article]);
 
   useEffect(() => {
     const fetchArticle = async () => {
@@ -78,11 +86,12 @@ useEffect(() => {
         p={{ base: 6, md: 12 }}
       >
         <VStack spacing={6} align="stretch">
-          <Heading textAlign="center" size="2xl">
+          <Heading  textAlign="center" size="2xl">
             {article.title}
           </Heading>
 
           <Text 
+          
             mb={6} 
             fontStyle="italic" 
             textAlign="center" 
@@ -94,7 +103,7 @@ useEffect(() => {
           <HStack alignItems="start">
                 <Avatar.Root size="lg"  borderRadius="50%">
                   <Avatar.Image
-                    src={article.profiles.avatar_url}
+                    src={article.profiles.avatar_url || `https://avatar.iran.liara.run/public/boy?username=${article.profiles.name}`}
                     
                   />
                   <Avatar.Fallback name={article.profiles.avatar_url || "Unknown"} />
@@ -138,6 +147,8 @@ useEffect(() => {
             <VStack>
               
               <Box
+              maxW="100%"
+              ref={containerRef}
              mt={4}
              dangerouslySetInnerHTML={{ __html: article.body }}>
               

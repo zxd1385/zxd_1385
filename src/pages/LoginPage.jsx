@@ -75,7 +75,7 @@ const LoginPage = () => {
             isLoading={loading}
             loadingText="Sending..."
           >
-            Send Magic Link {loading && <Spinner />}
+            Send Link {loading && <Spinner />}
           </Button>
         </VStack>
       </Box>

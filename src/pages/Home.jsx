@@ -29,6 +29,7 @@ import { LuHand } from "react-icons/lu";
 import { FaRegHandPaper, FaSmile, FaInfoCircle  } from "react-icons/fa";
 
 
+
 const MotionBox = motion(Box);
 
 function Home() {
@@ -92,6 +93,7 @@ function Home() {
       checkProfile();
     }, []);
 
+    
 
   return (
     <>
@@ -101,6 +103,10 @@ function Home() {
   left={{ base: 4, md: 40 }}       // 4 units on small screens, 40 units (~160px) on medium+
   zIndex="banner"
 >
+
+
+
+
   <motion.div
     initial={{ opacity: 0 }}
     animate={{ opacity: show ? 1 : 0 }}
@@ -135,7 +141,7 @@ function Home() {
     maxW="6xl"
     w="full"
     textAlign={{ base: "center", md: "left" }} // responsive text alignment
-    mt={{ base: 8, md: 10 }}
+    mt={{ base: 3, md: 10 }}
   >
     <MotionBox
       flex="1"
@@ -173,13 +179,13 @@ function Home() {
         fontWeight="bold"
         mb={4}
         lineHeight="short"
-        color="gray.600"
+        color="gray.300"
       >
         Hey, I'm <Text as="span" color="teal.400">zxd1385</Text>
       </Heading>
-      <Text fontSize={{ base: "md", md: "lg" }} color="gray.600" mb={6}>
+      <Text fontSize={{ base: "md", md: "lg" }} color="gray.300" mb={6}>
         A passionate Electrical Engineering Student at Sharif University of Technology(EE-SUT) ...
-        <br />see my github->https://github.com/zxd1385
+        <br />see my github: https://github.com/zxd1385
       </Text>
       <Button
         colorScheme="teal"

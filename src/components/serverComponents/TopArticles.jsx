@@ -66,7 +66,7 @@ const TopArticles = ({ limit = 3 }) => {
               <HStack alignItems="start">
                 <Avatar.Root size="lg"  borderRadius="50%">
                   <Avatar.Image
-                    src={article.profiles.avatar_url}
+                    src={article.profiles.avatar_url || `https://avatar.iran.liara.run/public/boy?username=${article.profiles.name}`}
                     
                   />
                   <Avatar.Fallback name={article.profiles.avatar_url || "Unknown"} />

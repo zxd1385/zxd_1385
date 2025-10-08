@@ -6,6 +6,7 @@ import LoadingScreen from '../components/ui/Loading';
 import { LuCheck, LuPen, LuX } from "react-icons/lu"
 import { FaGlobe, FaMapMarkerAlt, FaPhoneAlt, FaBirthdayCake } from 'react-icons/fa'; // Add the icons here
 import { IoPerson } from 'react-icons/io5'; // For role icon
+import { FaHeadset } from 'react-icons/fa';
 import UsersList from '../components/serverComponents/UsersList';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
@@ -24,11 +25,7 @@ const Dashboard = () => {
   const [loadingProfile, setLoadingProfile] = useState(true);
   const [loadingArticles, setLoadingArticles] = useState(true);
   const [loadingProjects, setLoadingProjects] = useState(true);
-  const [loadingAdminProjects, setLoadingAdminProjects] = useState(true);
-  const [loadingAdminArticles, setLoadingAdminArticles] = useState(false);
-  const [loadingAdminContacts, setLoadingAdminContacts] = useState(true);
-  const [submitLoading, setSubmitLoading] = useState(false)
-  const [approvingId, setApprovingId] = useState(null);
+  const [submitLoading, setSubmitLoading] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [endDate, setEndDate] = useState(null);
@@ -69,6 +66,8 @@ const Dashboard = () => {
 
   useEffect(() => {
     const fetchSession = async () => {
+      
+      
       const { data: { session }, error } = await supabase.auth.getSession();
       if (error || !session) {
         navigate('/login'); // redirect if not logged in
@@ -76,7 +75,20 @@ const Dashboard = () => {
       }
       setSession(session);
       fetchProfile(session.user.id);
+
+      // const resp = await fetch('https://vklkbmottirkmhyuuqce.functions.supabase.co/sendToTelegram', {
+      //   method: 'POST',
+      //   headers: { 'Content-Type': 'application/json',
+      //     'Authorization': `Bearer ${session?.access_token}`,
+      //    },
+      //   body: JSON.stringify({
+      //     text: "📰 A new <s>article</s> was posted! Check it out!"
+      //   }),
+      // });
+      // console.log(resp);
     };
+
+    
 
     const fetchProfile = async (userId) => {
       const { count, error: countError } = await supabase
@@ -160,35 +172,7 @@ const Dashboard = () => {
     fetchData();
   }, [session]);
   
-  useEffect(() => {
-    const fetchAdminData = async () => {
-      if (!isAdmin) return;
   
-      // Fetch all contacts
-      const { data: contactsData, error: contactsError } = await supabase
-        .from('contacts')
-        .select('*')
-        .limit(15);
-  
-      if (contactsError) console.error('Error fetching contacts:', contactsError);
-      setContacts(contactsData || []);
-      setLoadingAdminContacts(false)
-  
-      
-  
-      // Fetch all non-visible projects
-      const { data: pendingProjects, error: projectsError } = await supabase
-        .from('projects')
-        .select('*')
-        .eq('is_visible', false);
-  
-      if (projectsError) console.error('Error fetching pending projects:', projectsError);
-      setPendingProjects(pendingProjects || []);
-      setLoadingAdminProjects(false)
-    };
-  
-    fetchAdminData();
-  }, [isAdmin]);
   
 
   // Simple validation helper functions
@@ -494,7 +478,7 @@ const isValidDateOfBirth = (dateOfBirth) => {
   {/* Avatar and Name */}
   <HStack align="center" spacing={4} w="full">
     <Image
-      src={profile.avatar_url || "https://avatar.iran.liara.run/public/13"}
+      src={profile.avatar_url || `https://avatar.iran.liara.run/public/boy?username=${profile.name}`}
       size="xs"
       name={profile.name}
       borderWidth="2px"
@@ -536,7 +520,7 @@ const isValidDateOfBirth = (dateOfBirth) => {
         )}
       </HStack>
       <Text fontSize="sm" fontWeight="bold" color="gray.600">
-        <HStack>Role: <Text as="span" color="teal.500"><HStack><IoPerson /> {profile.role || "User"}</HStack></Text></HStack>
+        <HStack>Role: <Text as="span" color="teal.500"><HStack>{isAdmin ? <FaHeadset />  : <IoPerson />}{profile.role || "User"}</HStack></Text></HStack>
       </Text>
     </Box>
 </VStack>
@@ -559,15 +543,15 @@ const isValidDateOfBirth = (dateOfBirth) => {
   <Button mt={4}
     colorScheme="teal"
     size="sm"
-    onClick={() => setEditMode(true)}
+    onClick={handleLogout}
     _hover={{ transform: "scale(1.05)" }}
-    transition="0.2s" onClick={handleLogout}
+    transition="0.2s" 
     >Logout
     </Button>
 
   {/* Articles & Projects Section */}
   <Box mt={8}>
-    <Heading size="md" mb={3} color="teal.500">Your Articles</Heading>
+    <Heading size="md" mb={3} color="teal.500">Your Articles({articles.length})</Heading>
     {loadingArticles ? (<LoadingScreen type='Articles' />) : articles.length > 0 ? (
       articles.map((article) => (
         <HStack key={article.id} justify="space-between"  p={1} mb={1}>
@@ -592,7 +576,7 @@ const isValidDateOfBirth = (dateOfBirth) => {
       <Text fontSize="sm" color="gray.500">No articles found.</Text>
     )}
 
-    <Heading size="md" mt={6} mb={3} color="teal.500">Your Projects</Heading>
+    <Heading size="md" mt={6} mb={3} color="teal.500">Your Projects({projects.length})</Heading>
     {loadingProjects ? (<LoadingScreen type='Projects' />) : projects.length > 0 ? (
       projects.map((project) => (
         <HStack key={project.id} justify="space-between"  p={1} mb={1}>
@@ -629,113 +613,11 @@ const isValidDateOfBirth = (dateOfBirth) => {
   </Heading>
 
 <UsersList />
-  {/* Date Range Filter */}
-  <HStack mb={6} spacing={4} justify="center">
-    <DatePicker
-      selected={startDate}
-      onChange={handleStartDateChange}
-      dateFormat="yyyy-MM-dd"
-      placeholderText="Start Date"
-      customInput={<Input variant="filled" color="gray.300" borderBottom="1px solid white" focusBorderColor="teal.400" />}
-    />
-    <DatePicker
-    selected={endDate}
-    onChange={handleEndDateChange}
-    placeholderText='End Date'
-    dateFormat="yyyy-MM-dd"
-    customInput={<Input variant="filled" color="gray.300" borderBottom="1px solid white" focusBorderColor="teal.400" />}
-  />
-  </HStack>
-
-  
-  
-
-{/* Pending Projects Section */}
-{loadingAdminProjects ? (<LoadingScreen type='Projects' />) :
-  (<Box>
-    <Heading size="md" color="teal.200" mb={3}>Pending Team-Member Projects</Heading>
-    {filteredProjects.length > 0 ? (
-      filteredProjects.map((p) => (
-        <Box
-          key={p.id}
-          mb={3}
-          p={3}
-          borderWidth="1px"
-          borderRadius="md"
-          borderColor="gray.700"
-          _hover={{ bg: "gray.700" }}
-          transition="0.2s"
-        >
-          <Collapsible.Root unmountOnExit>
-            <Collapsible.Trigger>
-              <Text fontWeight="bold" color="teal.300" cursor="pointer">
-                {p.title} — {new Date(p.created_at).toLocaleDateString()}
-              </Text>
-            </Collapsible.Trigger>
-            <Collapsible.Content>
-              <Box mt={2} p={3} borderWidth="1px" borderRadius="md" borderColor="gray.600" bg="gray.900">
-                <Text fontSize="sm" color="gray.100" mb={2}>{p.description}</Text>
-                <HStack spacing={4}>
-                  <Link href={p.image_url} color="teal.400" isExternal>Project Image</Link>
-                  <Link href={p.pdf_url} color="teal.400" isExternal>Project PDF</Link>
-                </HStack>
-              </Box>
-            </Collapsible.Content>
-          </Collapsible.Root>
-  
-          <Button
-            mt={2}
-            size="xs"
-            colorScheme="green"
-            onClick={() => approveProject(p.id)}
-            _hover={{ transform: "scale(1.05)" }}
-            transition="0.2s"
-          >
-            {approvingId === p.id ? <Spinner size="xs" /> : <LuCheck />}
-            Approve
-          </Button>
-        </Box>
-      ))
-    ) : (
-      <Text fontSize="sm" color="gray.500">No pending projects in this date range.</Text>
-    )}
-    </Box>)
-  }
-  
-
-
-  <Box mt={10} p={6} borderWidth="1px" borderRadius="lg" borderColor="gray.800" bg="gray.900" boxShadow="lg">
-  <Heading size="lg" mb={6} color="teal.500" textAlign="center">Contact Messages</Heading>
-
-  {/* Contact Messages */}
-  {loadingAdminContacts ? (<LoadingScreen type='Contacts' />) : contacts.length > 0 ? (
-    contacts.map(c => (
-      <Box key={c.id} mb={3} p={3} borderWidth="1px" borderRadius="md" borderColor="gray.700" _hover={{ bg: "gray.700" }} transition="0.2s">
-        <Collapsible.Root unmountOnExit>
-          <Collapsible.Trigger>
-            <Text fontWeight="bold" color="teal.300" cursor="pointer">
-              {c.name} — {c.email} ({c.telegram_id})
-            </Text>
-          </Collapsible.Trigger>
-          <Collapsible.Content>
-            <Box mt={2} p={3} borderWidth="1px" borderRadius="md" borderColor="gray.600" bg="gray.900">
-              <Text fontSize="sm" color="gray.100">{c.idea}</Text>
-            </Box>
-          </Collapsible.Content>
-        </Collapsible.Root>
-
-        <Button mt={2} size="xs" colorScheme="green" onClick={() => approveContact(c.id)} _hover={{ transform: "scale(1.05)" }} transition="0.2s">
-          <LuCheck /> Approve
-        </Button>
-      </Box>
-    ))
-  ) : (
-    <Text fontSize="sm" color="gray.500">No contact messages in this date range.</Text>
-  )}
+ 
 </Box>
 
   
-</Box>
+
 )}
 
 

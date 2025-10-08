@@ -3,6 +3,7 @@ import { Box, Button, Input, Textarea, VStack, Heading, Text, Spinner, Image } f
 import { LuCheck } from 'react-icons/lu';
 import { supabase } from '../lib/supabaseClient';
 import { sendTextToAdmin } from '../custom-js/senTextToAdmin';
+import { sendTelegramMessage } from '../custom-js/sendTelegramMessage';
 
 const ContactForm = () => {
   const [formData, setFormData] = useState({
@@ -40,8 +41,8 @@ const ContactForm = () => {
 
     setLoading(true);
     const { error } = await supabase.from('contacts').insert([formData]);
-    const strToAdmin = `💬A new Contact us message has been sent to you!\nName: ${formData.name}\nEmail: ${formData.email}\nTelegram ID: ${formData.telegram_id}\nMessage: ${formData.idea}`
-    const sentText = await sendTextToAdmin(strToAdmin);
+    const strToAdmin = `💬A new <b>Contact us</b> message has been sent to you!\nName: <i>${formData.name}</i>\nEmail: ${formData.email}\nTelegram ID: <i>${formData.telegram_id}</i>\nMessage: <i>${formData.idea}</i>`
+    const sentText = await sendTelegramMessage(strToAdmin);
 
     if (error) {
       setErrors({ submit: error.message });

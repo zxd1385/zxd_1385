@@ -35,7 +35,7 @@ const ProjectsPage = () => {
     fetchProjects();
   }, []);
 
-  if (loading) return <LoadingScreen />;
+  if (loading) return <LoadingScreen type='Projects' padd={40}  />;
   return (
     <Box p={8}>
       <Heading mb={6} color="teal.300" textAlign="center">
@@ -82,7 +82,7 @@ const ProjectsPage = () => {
               <HStack ml={3}>
                 <Avatar.Root size="lg"  borderRadius="50%">
                   <Avatar.Image
-                    src={project.profiles.avatar_url}
+                    src={project.profiles.avatar_url || `https://avatar.iran.liara.run/public/boy?username=${project.profiles.name}`}
                     
                   />
                   <Avatar.Fallback name={project.profiles.avatar_url || "Unknown"} />

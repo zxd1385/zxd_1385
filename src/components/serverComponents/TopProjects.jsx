@@ -72,7 +72,7 @@ const TopProjects = ({ limit = 3 }) => {
               <HStack ml={3}>
                 <Avatar.Root size="lg"  borderRadius="50%">
                   <Avatar.Image
-                    src={project.profiles.avatar_url}
+                    src={project.profiles.avatar_url || `https://avatar.iran.liara.run/public/boy?username=${project.profiles.name}`}
                     
                   />
                   <Avatar.Fallback name={project.profiles.avatar_url || "Unknown"} />

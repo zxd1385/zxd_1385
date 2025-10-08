@@ -13,6 +13,8 @@ export default function Navbar() {
   const [searchQuery, setSearchQuery] = useState("");  // State to hold the search query
   const [searchResults, setSearchResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false) 
+  const [name, setName] = useState('')
+  const [pic, setPic] = useState('')
 
   const navigate = useNavigate()
 
@@ -78,6 +80,35 @@ export default function Navbar() {
 
     setIsSearching(false)
   };
+
+  useEffect(() => {
+    const checkProfile = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from('profiles') // Assuming your profile table is called 'profiles'
+        .select('name, avatar_url')
+        .eq('id', session.user.id) // Replace with the correct user ID column
+        .single();
+
+      if (error) {
+          return
+      } else {
+        if (data) {
+          // If profile exists, greet user by name
+          setName(data.name);
+          setPic(data.avatar_url)
+        }
+      }
+
+    };
+
+    checkProfile();
+  }, []);
   
 
   return (
@@ -128,7 +159,7 @@ export default function Navbar() {
         cursor="pointer"
         _hover={{ backgroundColor: "gray.700" }}
       >
-        Noyhing found for "{searchQuery}"
+        Nothing found for "{searchQuery}"
       </Box>
             </Box>
             )}
@@ -145,6 +176,12 @@ export default function Navbar() {
           </button>
           {menuOpen && (
             <div style={styles.mobileMenu}>
+              {name!='' && (
+              <div style={{display:"flex", justifyContent:"start", alignItems:"center", gap:"8px"}}>
+                <img src={pic || `https://avatar.iran.liara.run/public/boy?username=${name}`} alt="" width="40px"/>
+                <span>Hey <b>{name}</b>!</span>
+              </div>
+              )}
               {navItems.map((item, idx) => (
                 <a
                   key={idx}
@@ -162,7 +199,13 @@ export default function Navbar() {
           )}
         </>
       ) : (
+        
         <div style={styles.menu}>
+          {name!='' && (
+            <div style={{position:"absolute", top:"60px", right:"10px", display:"flex", justifyContent:"start", alignItems:"center", gap:"8px"}}>
+                <img src={pic || `https://avatar.iran.liara.run/public/boy?username=${name}`} alt="" width="40px"/>
+                <span>Hey <b>{name}</b>!</span>
+          </div>)}
           {navItems.map((item, idx) => (
             <a key={idx} href={item.href} style={styles.menuItem}>
               <Icon as={item.icon} mr={2} /> 

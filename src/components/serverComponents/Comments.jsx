@@ -18,6 +18,7 @@ import { validateWithServer } from "../../custom-js/validationServerText";
 import { sendTextToAdmin } from "../../custom-js/senTextToAdmin";
 import LoadingScreen from "../ui/Loading";
 import { comment } from "postcss";
+import { sendTelegramMessage } from "../../custom-js/sendTelegramMessage";
 
 export default function Comments({ articleId }) {
   const [loadingcomments, setloadingcomments] = useState(true)
@@ -72,8 +73,8 @@ export default function Comments({ articleId }) {
       }
 
     const addcomment = await addComment(articleId, user.id, content);
-    const strToAdmin = `📝A new Comment has been sent succesfuly!\nContent: ${content}\nArticle ID: ${articleId}\nUser ID: ${user.id}\ngo to site and check it manualy!`
-    const sentText = await sendTextToAdmin(strToAdmin);
+    const strToAdmin = `📝A new <b>Comment</b> has been sent succesfuly!\nContent: <i>${content}</i>\nArticle ID: ${articleId}\nUser ID: ${user.id}\ngo to <a href="${import.meta.env.VITE_SITE_URL}/#/article/${articleId}">this article</a> and check it manualy!`
+    const sentText = await sendTelegramMessage(strToAdmin);
     setContent("");
     setloadingcomments(true)
     const data = await getComments(articleId);
