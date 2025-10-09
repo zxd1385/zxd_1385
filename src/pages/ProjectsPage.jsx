@@ -1,12 +1,27 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Box, Heading, Text, Button, Stack, Card, Avatar, Image, HStack} from "@chakra-ui/react";
+import { Box, Heading, Text, Button, Stack, Card, Avatar, Image, HStack, Input} from "@chakra-ui/react";
 import { supabase } from '../lib/supabaseClient';
 import LoadingScreen from '../components/ui/Loading';
 
 const ProjectsPage = () => {
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [filteredProjects, setfilteredProjects] = useState([]);
+  const [search, setSearch] = useState("");
+
+  useEffect(
+    () => {
+      const filteredProjects = projects.filter(
+        (projects) =>
+          projects.profiles.name?.toLowerCase().includes(search.toLowerCase()) ||
+        projects.title?.toLowerCase().includes(search.toLowerCase()) ||
+        projects.description?.toLowerCase().includes(search.toLowerCase())
+      );
+      setfilteredProjects(filteredProjects)
+      
+    }
+  , [search])
 
   useEffect(() => {
     const fetchProjects = async () => {
@@ -28,6 +43,7 @@ const ProjectsPage = () => {
         console.error('Error fetching projects:', error);
       } else {
         setProjects(data);
+        setfilteredProjects(data)
         setLoading(false);
       }
     };
@@ -39,16 +55,25 @@ const ProjectsPage = () => {
   return (
     <Box p={8}>
       <Heading mb={6} color="teal.300" textAlign="center">
-        Projects
+        Projects ({filteredProjects.length})
       </Heading>
+      <Box mb={4} maxW="400px" mx="auto">
+        <Input
+          placeholder="Search Projects by Content, Author"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          bg="gray.700"
+          color="white"
+        />
+      </Box>
 
       <Stack gap="4" direction="row" wrap="wrap" justify="center">
-        {projects.length === 0 ? (
+        {filteredProjects.length === 0 ? (
           <Text textAlign="center" color="gray.400" fontSize="lg">
             No projects to show
           </Text>
         ) : (
-          projects.map((project) => (
+          filteredProjects.map((project) => (
             <Card.Root
               key={project.id}
               width="320px"

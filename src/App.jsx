@@ -16,6 +16,7 @@ import ProjectsPage from "./pages/ProjectsPage";
 import ProjectPage from "./pages/ProjectPage";
 import CreateProjectPage from "./pages/CreateProjectPage";
 import ProtectedRoute from "./components/serverComponents/ProtectedRoute";
+import StatusBar from "./components/ui/StatusBar";
 
 
 function App() {
@@ -33,6 +34,7 @@ function App() {
         ]}
       />
 
+        <StatusBar />
 
       <Routes>
               {/* Public Routes */}

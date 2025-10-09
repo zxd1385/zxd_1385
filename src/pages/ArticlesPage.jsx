@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Box, Heading, Text, Button, Stack, Card, Avatar, HStack } from "@chakra-ui/react";
+import { Box, Heading, Text, Button, Stack, Card, Avatar, HStack, Input } from "@chakra-ui/react";
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient';
 import LoadingScreen from '../components/ui/Loading';
@@ -7,7 +7,22 @@ import LoadingScreen from '../components/ui/Loading';
 const ArticlesPage = () => {
   const [articles, setArticles] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [filteredArticles, setfilteredArticles] = useState([]);
+  const [search, setSearch] = useState("");
   const navigate = useNavigate();
+
+  useEffect(
+    () => {
+      const filteredArticles = articles.filter(
+        (article) =>
+          article.profiles.name?.toLowerCase().includes(search.toLowerCase()) ||
+        article.title?.toLowerCase().includes(search.toLowerCase()) ||
+        article.short_description?.toLowerCase().includes(search.toLowerCase())
+      );
+      setfilteredArticles(filteredArticles)
+      
+    }
+  , [search])
 
   useEffect(() => {
     const fetchArticles = async () => {
@@ -34,6 +49,7 @@ const ArticlesPage = () => {
       } else {
         console.log(data); // Each article will now have a "profiles" object
         setArticles(data);
+        setfilteredArticles(data)
       }
     
       setLoading(false);
@@ -46,18 +62,27 @@ const ArticlesPage = () => {
   if (loading) return <LoadingScreen type='Articles' padd={40} />;
 
   return (
-    <Box p={8}>
+    <Box p={8} textAlign="center">
       <Heading mb={6} color="teal.300" textAlign="center">
-        Articles
+        Articles ({filteredArticles.length})
       </Heading>
+      <Box mb={4} maxW="400px" mx="auto">
+        <Input
+          placeholder="Search Articles by Content, Author"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          bg="gray.700"
+          color="white"
+        />
+      </Box>
 
       <Stack gap="4" direction="row" wrap="wrap" justify="center">
-        {articles.length === 0 ? (
+        {filteredArticles.length === 0 ? (
           <Text textAlign="center" color="gray.400" fontSize="lg">
             No articles to show
           </Text>
         ) : (
-          articles.map((article) => (
+          filteredArticles.map((article) => (
             <Card.Root
               key={article.id}
               width="320px"
