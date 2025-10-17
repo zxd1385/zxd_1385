@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {  Alert, Collapsible, Box, Heading, Text, Image, Button, Input, VStack, HStack, Link, Select, Spinner} from '@chakra-ui/react';
+import {  Alert, Collapsible, Box, Heading, Text, Image, Button, Input, VStack, HStack, Link, Select, Spinner, Stack, Textarea} from '@chakra-ui/react';
 import { supabase } from '../lib/supabaseClient';
 import LoadingScreen from '../components/ui/Loading';
-import { LuCheck, LuPen, LuX } from "react-icons/lu"
+import { LuCheck, LuPen, LuX, LuLoader} from "react-icons/lu"
 import { FaGlobe, FaMapMarkerAlt, FaPhoneAlt, FaBirthdayCake } from 'react-icons/fa'; // Add the icons here
 import { IoPerson } from 'react-icons/io5'; // For role icon
 import { FaHeadset } from 'react-icons/fa';
@@ -13,6 +13,10 @@ import "react-datepicker/dist/react-datepicker.css";
 
 const Dashboard = () => {
   const navigate = useNavigate();
+  const [emailSubject, setEmailSubject] = useState("");
+  const [emailBody, setEmailBody] = useState("");
+  const [sendingEmail, setSendingEmail] = useState(false);
+  const [emailResult, setEmailResult] = useState(null);
   const [projects, setProjects] = useState([]);
   const [articles, setArticles] = useState([]);
   const [contacts, setContacts] = useState([]);
@@ -67,8 +71,30 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchSession = async () => {
       
+      // Your Google Apps Script Web App URL
+// const url = "";
+
+// // Build query parameters
+// const params = new URLSearchParams({
+//   recipients: "zxd1385zxd1385@gmail.com,zxd1385zxd1385@gmail.com", // comma-separated emails
+//   subject: "Hello from fetch",
+//   body: "This is a test email",
+//   htmlBody: "<b>HTML content</b>"
+// });
+
+// // Make GET request
+// fetch(`${url}?${params.toString()}`)
+//   .then(response => response.json())
+//   .then(data => {
+//     console.log("Response from Google Script:", data);
+//   })
+//   .catch(err => {
+//     console.error("Error calling Google Script:", err);
+//   });
+
       
       const { data: { session }, error } = await supabase.auth.getSession();
+      // console.log(session.user.email);
       if (error || !session) {
         navigate('/login'); // redirect if not logged in
         return;
@@ -239,6 +265,30 @@ const isValidDateOfBirth = (dateOfBirth) => {
     setProfile(profileData);
     setEditMode(false);
   };
+  
+  const handleSendEmailToSheetUsers = async () => {
+    if (!emailSubject || !emailBody) {
+      alert("Please fill in subject and body");
+      return;
+    }
+  
+    setSendingEmail(true);
+    setEmailResult(null);
+  
+    try {
+      const url = `${import.meta.env.VITE_GOOGLe_NEWSLETTER_API_KEY}?action=send&subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}&htmlBody=${encodeURIComponent(emailBody)}`;
+  
+      const response = await fetch(url);
+      const data = await response.json();
+      setEmailResult(data);
+    } catch (err) {
+      console.error(err);
+      setEmailResult({ success: false, error: err.toString() });
+    }
+  
+    setSendingEmail(false);
+  };
+  
   
   
   
@@ -611,6 +661,67 @@ const isValidDateOfBirth = (dateOfBirth) => {
   <Heading size="lg" mb={6} color="teal.300" textAlign="center">
     Admin Panel
   </Heading>
+
+  {/* --- NEW EMAIL PANEL --- */}
+<Box
+  mt={6}
+  mb={8}
+  p={6}
+  bg="gray.800"
+  borderRadius="lg"
+  boxShadow="lg"
+  borderWidth="1px"
+  borderColor="gray.700"
+>
+  <Heading size="md" mb={4} color="teal.300" textAlign="center">
+    zxdClub Newsletter
+  </Heading>
+
+  <Stack spacing={3}>
+    <Input
+      placeholder="Email Subject"
+      value={emailSubject}
+      onChange={(e) => setEmailSubject(e.target.value)}
+      variant="filled"
+      bg="gray.700"
+      color="gray.200"
+      _focus={{ borderColor: "teal.400", bg: "gray.700" }}
+    />
+
+    <Textarea
+      placeholder="Email Body"
+      value={emailBody}
+      onChange={(e) => setEmailBody(e.target.value)}
+      variant="filled"
+      bg="gray.700"
+      color="gray.200"
+      _focus={{ borderColor: "teal.400", bg: "gray.700" }}
+    />
+
+    <Button
+      colorScheme="teal"
+      onClick={handleSendEmailToSheetUsers}
+      isLoading={sendingEmail}
+      size="md"
+      fontWeight="bold"
+      _hover={{ transform: "scale(1.03)", boxShadow: "lg" }}
+      transition="all 0.2s"
+    >
+      {!sendingEmail ? "Send Email" : "Sending"}
+      {sendingEmail && <LuLoader className="animate-spin"/>}
+    </Button>
+
+    {emailResult && (
+  <HStack mt={2} justify="center" color={emailResult.success ? "green.400" : "red.400"}>
+    {emailResult.success ? <LuCheck /> : <LuX />}
+    <Text fontWeight="medium">
+      {emailResult.success ? "Emails sent successfully!" : `Error: ${emailResult.error || "Failed to send"}`}
+    </Text>
+  </HStack>
+)}
+  </Stack>
+</Box>
+
 
 <UsersList />
  

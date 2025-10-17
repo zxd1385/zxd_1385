@@ -97,10 +97,9 @@ const ProjectsPage = () => {
                 <Card.Title mb="2" color="teal.200">
                   {project.title}
                 </Card.Title>
-                <Card.Description color="gray.400" noOfLines={1}>
-                {project.description.length > 100
-                ? project.description.slice(0, 100) + "..."
-                : project.description}
+                <Card.Description color="gray.400" noOfLines={1}
+                dangerouslySetInnerHTML={{ __html: project.description }}>
+                
                 </Card.Description>
               </Card.Body>
               <Card.Footer justifyContent="space-between">

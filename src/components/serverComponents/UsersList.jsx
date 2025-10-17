@@ -40,9 +40,11 @@ const UsersList = () => {
       } finally {
         setLoading(false);
       }
+      
     };
 
     fetchUsers();
+    
   }, []);
 
   if (loading) {
