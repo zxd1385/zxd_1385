@@ -3,6 +3,7 @@ import { Box, VStack, HStack, Heading, Text, Button, Stack, Avatar, Card } from 
 import { Link } from 'react-router-dom';
 import { supabase } from '../../lib/supabaseClient';
 import { useNavigate } from 'react-router-dom';
+import { useInView } from "react-intersection-observer";
 
 const TopArticles = ({ limit = 3 }) => {
   const [articles, setArticles] = useState([]);
@@ -32,8 +33,18 @@ const TopArticles = ({ limit = 3 }) => {
     fetchArticles();
   }, [limit]);
 
+  const [show, setShow] = useState(false);
+
+  const { ref, inView } = useInView({
+    threshold: 0.3,  // trigger when 30% of the container is visible
+    triggerOnce: true // only trigger once
+  });
+
+  // Start counting when in viewport
+  if (inView && !show) setShow(true);
+
   return (
-    <Box p={8}>
+    <Box p={8} >
       <Heading mb={6} color="teal.300" textAlign="center">
         Top Articles
       </Heading>
@@ -44,7 +55,8 @@ const TopArticles = ({ limit = 3 }) => {
             No articles to show
           </Text>
         ) : (
-          articles.map((article) => (
+          articles.map((article) =>
+             (
             <Card.Root
               key={article.id}
               width="320px"
@@ -63,7 +75,7 @@ const TopArticles = ({ limit = 3 }) => {
                 </Card.Description>
               </Card.Body>
               <Card.Footer justifyContent="space-between">
-              <HStack alignItems="start">
+              <HStack alignItems="center">
                 <Avatar.Root size="lg"  borderRadius="50%">
                   <Avatar.Image
                     src={article.profiles.avatar_url || `https://avatar.iran.liara.run/public/boy?username=${article.profiles.name}`}

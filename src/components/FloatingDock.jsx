@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { FaBars, FaTimes, FaPlusCircle, FaProjectDiagram, FaEnvelope } from "react-icons/fa";
+import { FaBars, FaTimes, FaPlusCircle, FaProjectDiagram, FaEnvelope, FaPencilAlt} from "react-icons/fa";
 import { Icon } from "@chakra-ui/react";
 
 
@@ -42,7 +42,7 @@ export default function FloatingDock({ items }) {
           onClick={() => setMobileOpen(!mobileOpen)}
           style={styles.mobileToggle}
         >
-          {mobileOpen ? <FaTimes size={24}  /> : <FaBars size={24} />}
+          {mobileOpen ? <FaTimes size={24}  /> : <FaPencilAlt size={18} />}
         </button>
       </div>
     );

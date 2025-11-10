@@ -3,8 +3,8 @@ import React, { useRef, useEffect } from "react";
 
 export const PixelatedCanvas = ({
   src,
-  width = 400,
-  height = 500,
+  width = 300,
+  height = 300,
   cellSize = 4,
   dotScale = 0.9,
   shape = "square",

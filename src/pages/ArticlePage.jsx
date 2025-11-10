@@ -8,6 +8,7 @@ import DigitalCountdown from '../components/ui/DigitalCowntdown';
 import LoadingScreen from '../components/ui/Loading';
 import LikeDislike from '../components/serverComponents/LikeDislike';
 import Comments from '../components/serverComponents/Comments';
+import StudyngProgressBar from '../components/ui/StudyngProgressBar';
 
 const ArticlePage = () => {
   const { id } = useParams();
@@ -75,7 +76,10 @@ const containerRef = useRef();
       justify="center"
       px={{ base: 4, md: 8 }}
       py={{ base: 8, md: 12 }}
+
     >
+      <StudyngProgressBar />
+      
       <Box
         maxW="800px"
         w="full"

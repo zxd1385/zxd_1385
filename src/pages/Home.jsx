@@ -27,6 +27,10 @@ import { useState, useEffect } from "react";
 import { supabase } from "../lib/supabaseClient";
 import { LuHand } from "react-icons/lu";
 import { FaRegHandPaper, FaSmile, FaInfoCircle  } from "react-icons/fa";
+import StudyngProgressBar from "../components/ui/StudyngProgressBar";
+import DraggableBox from "../components/ui/DraggableBox";
+import AnimatedCounter from "../components/ui/AnimatedCounter";
+import { useInView } from "react-intersection-observer";
 
 
 
@@ -93,10 +97,24 @@ function Home() {
       checkProfile();
     }, []);
 
+
+  const [startCount, setStartCount] = useState(false);
+
+  const { ref, inView } = useInView({
+    threshold: 0.3,  // trigger when 30% of the container is visible
+    triggerOnce: true // only trigger once
+  });
+  
+
+  // Start counting when in viewport
+  if (inView && !startCount) setStartCount(true);
     
 
   return (
     <>
+    {/* <StudyngProgressBar /> */}
+    {/* <DraggableBox /> */}
+
     <Box
   position="fixed"
   top={{ base: 16, md: 16 }}        // 4 units on small screens, 16 units on medium+
@@ -126,6 +144,7 @@ function Home() {
     </Box>
   </motion.div>
     </Box>
+
 
     <Box
   minH="100vh"
@@ -201,7 +220,44 @@ function Home() {
   </Stack>
     </Box>
 
-    
+    <Box
+      // maxW="6xl"  
+      mx="auto"                // center horizontally
+      // bg="gray.900"            // background color
+      p={{ base: 6, md: 10 }}  // responsive padding
+      borderRadius="md"        // rounded corners
+      boxShadow="lg"           // subtle shadow
+      textAlign="center"       // center content
+      ref={ref} 
+    >
+      <Stack
+        direction={{ base: "column", md: "row" }}
+        spacing={{ base: 6, md: 12 }}
+        justify="space-around"
+        align="center"
+      >
+        <Box>
+          <Text fontSize="2xl" color="teal.400" fontWeight="bold">
+          {startCount ? <AnimatedCounter target={1234} /> : 0}+
+          </Text>
+          <Text color="gray.300" mt={2}>Articles</Text>
+        </Box>
+
+        <Box>
+          <Text fontSize="2xl" color="teal.400" fontWeight="bold">
+          {startCount ? <AnimatedCounter target={897} /> : 0}+
+          </Text>
+          <Text color="gray.300" mt={2}>Users</Text>
+        </Box>
+
+        <Box>
+          <Text fontSize="2xl" color="teal.400" fontWeight="bold">
+          {startCount ? <AnimatedCounter target={5678} /> : 0}+
+          </Text>
+          <Text color="gray.300" mt={2}>Comments</Text>
+        </Box>
+      </Stack>
+    </Box>
 
 
 

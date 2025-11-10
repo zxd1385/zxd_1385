@@ -4,6 +4,7 @@ import { Box, Heading, Text, Image, Button, Link, VStack, HStack, Flex, Avatar }
 import { supabase } from '../lib/supabaseClient';
 import MarkdownRenderer from '../components/serverComponents/MarkDownRenderer';
 import LoadingScreen from '../components/ui/Loading';
+import StudyngProgressBar from '../components/ui/StudyngProgressBar';
 
 const ProjectPage = () => {
   const { id } = useParams(); // Get project ID from the URL
@@ -53,6 +54,7 @@ const ProjectPage = () => {
       px={{ base: 3, md: 8 }}
       py={{ base: 6, md: 12 }}
     >
+      <StudyngProgressBar />
       <Box 
         maxW="800px" 
         w="full"
