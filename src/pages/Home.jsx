@@ -31,6 +31,9 @@ import StudyngProgressBar from "../components/ui/StudyngProgressBar";
 import DraggableBox from "../components/ui/DraggableBox";
 import AnimatedCounter from "../components/ui/AnimatedCounter";
 import { useInView } from "react-intersection-observer";
+import BlurText from "../components/ui/TextAnimations/BlurText";
+import DecryptedText from "../components/ui/TextAnimations/DecryptedText";
+import TextType from "../components/ui/TextAnimations/TextType";
 
 
 
@@ -62,6 +65,9 @@ function Home() {
         nv: "/login"
       },
     ];
+    const handleAnimationComplete = () => {
+      console.log('Animation completed!');
+    };
     useEffect(() => {
       const checkProfile = async () => {
         const { data: { session } } = await supabase.auth.getSession();
@@ -101,7 +107,7 @@ function Home() {
   const [startCount, setStartCount] = useState(false);
 
   const { ref, inView } = useInView({
-    threshold: 0.3,  // trigger when 30% of the container is visible
+    threshold: 0.8,  // trigger when 30% of the container is visible
     triggerOnce: true // only trigger once
   });
   
@@ -139,7 +145,9 @@ function Home() {
       boxShadow="lg"
     >
       <HStack spacing={1} justify="start">
-        {icon}<Text fontWeight="bold">{message}</Text>
+        {icon}<Text fontWeight="bold">
+        {message}
+              </Text>
       </HStack>
     </Box>
   </motion.div>
@@ -153,16 +161,16 @@ function Home() {
   justifyContent="center"
   px={{ base: 2, md: 6 }} // responsive padding
 >
-  <Stack
+  <VStack
     direction={{ base: "column", md: "row" }} // column on mobile, row on desktop
     spacing={{ base: 8, md: 10 }}             // responsive spacing
     align="center"
     maxW="6xl"
     w="full"
     textAlign={{ base: "center", md: "left" }} // responsive text alignment
-    mt={{ base: 3, md: 10 }}
+    // mt={{ base: 3, md: 10 }}
   >
-    <MotionBox
+    {/* <MotionBox
       flex="1"
       display="flex"
       justifyContent="center"
@@ -183,7 +191,16 @@ function Home() {
         backgroundColor="transparent"
         style={{ borderRadius: "50%", overflow: "hidden" }} 
       />
-    </MotionBox>
+    </MotionBox> */}
+    <TextType 
+  text={["Welcome to zxdclub", "A community for innovators", "Building creative projects", "One spark at a time"]}
+  textColors = {["white", "white", "white"]}
+  typingSpeed={75}
+  pauseDuration={2000}
+  showCursor={true}
+  cursorCharacter="_"
+/>
+    
     
     <MotionBox
       flex="1"
@@ -217,7 +234,7 @@ function Home() {
     </MotionBox>
 
     
-  </Stack>
+  </VStack>
     </Box>
 
     <Box

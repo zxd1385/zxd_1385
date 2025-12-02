@@ -5,6 +5,7 @@ import AuthButton from "./serverComponents/AuthButton";
 import { supabase } from "../lib/supabaseClient";
 import { useNavigate } from "react-router-dom";
 import LoadingScreen from "./ui/Loading";
+import TrueFocus from "./ui/TextAnimations/TrueFocus";
 
 
 export default function Navbar() {
@@ -113,8 +114,18 @@ export default function Navbar() {
 
   return (
     <nav style={styles.navbar}>
+      
       <div style={styles.logo}>
-        <span style={{ marginRight: "10px" }}>zxdClub</span>
+        <span style={{ marginRight: "10px" }}>
+        <TrueFocus 
+sentence="zxd club"
+manualMode={false}
+blurAmount={5}
+borderColor="rgb(199, 5, 147)"
+animationDuration={2}
+pauseBetweenAnimations={1}
+/>
+          </span>
       </div>
 
       {/* Search Bar */}

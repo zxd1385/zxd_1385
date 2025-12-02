@@ -5,6 +5,7 @@ import { supabase } from '../lib/supabaseClient';
 import MarkdownRenderer from '../components/serverComponents/MarkDownRenderer';
 import LoadingScreen from '../components/ui/Loading';
 import StudyngProgressBar from '../components/ui/StudyngProgressBar';
+import BlurText from '../components/ui/TextAnimations/BlurText';
 
 const ProjectPage = () => {
   const { id } = useParams(); // Get project ID from the URL
@@ -44,6 +45,10 @@ const ProjectPage = () => {
     fetchProject();
   }, [id]);
 
+  const handleAnimationComplete = () => {
+    console.log('Animation completed!');
+  };
+
   if (!project) return <LoadingScreen type='Project' padd={40} />;
 
   return (
@@ -66,7 +71,14 @@ const ProjectPage = () => {
       >
         <VStack spacing={6} align="stretch">
           <Heading textAlign="center" size="2xl">
-            {project.title}
+          <BlurText
+  text={project.title}
+  delay={150}
+  animateBy="words"
+  direction="top"
+  onAnimationComplete={handleAnimationComplete}
+  className="text-2xl mb-8 "
+/>
           </Heading>
 
           {project.image_url && (

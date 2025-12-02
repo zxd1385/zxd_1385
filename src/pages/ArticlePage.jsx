@@ -9,6 +9,7 @@ import LoadingScreen from '../components/ui/Loading';
 import LikeDislike from '../components/serverComponents/LikeDislike';
 import Comments from '../components/serverComponents/Comments';
 import StudyngProgressBar from '../components/ui/StudyngProgressBar';
+import BlurText from '../components/ui/TextAnimations/BlurText';
 
 const ArticlePage = () => {
   const { id } = useParams();
@@ -23,6 +24,10 @@ useEffect(() => {
   };
   getSession();
 }, []);
+
+const handleAnimationComplete = () => {
+  console.log('Animation completed!');
+};
 
 const containerRef = useRef();
 
@@ -91,7 +96,14 @@ const containerRef = useRef();
       >
         <VStack spacing={6} align="stretch">
           <Heading  textAlign="center" size="2xl">
-            {article.title}
+          <BlurText
+  text={article.title}
+  delay={150}
+  animateBy="words"
+  direction="top"
+  onAnimationComplete={handleAnimationComplete}
+  className="text-2xl mb-8 "
+/>
           </Heading>
 
           <Text 

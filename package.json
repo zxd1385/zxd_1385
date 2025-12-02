@@ -40,7 +40,8 @@
     "framer-motion": "^12.23.15",
     "graphql": "^16.11.0",
     "gray-matter": "^4.0.3",
-    "motion": "^12.23.15",
+    "gsap": "^3.13.0",
+    "motion": "^12.23.25",
     "react": "^18.3.1",
     "react-datepicker": "^8.7.0",
     "react-dom": "^18.3.1",
@@ -52,7 +53,8 @@
     "remark-gfm": "^4.0.1",
     "simplex-noise": "^4.0.3",
     "swiper": "^12.0.2",
-    "tailwind-merge": "^3.3.1"
+    "tailwind-merge": "^3.3.1",
+    "three": "^0.181.2"
   },
   "devDependencies": {
     "@eslint/js": "^9.35.0",

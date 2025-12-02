@@ -17,6 +17,7 @@ import ProjectPage from "./pages/ProjectPage";
 import CreateProjectPage from "./pages/CreateProjectPage";
 import ProtectedRoute from "./components/serverComponents/ProtectedRoute";
 import StatusBar from "./components/ui/StatusBar";
+import FloatingLines from "./components/ui/FloatingLines";
 
 
 function App() {
@@ -24,9 +25,37 @@ function App() {
   return (
     <>
       
-      <AnimatedGradientBackground   />
-      <Navbar  />
-      <FloatingDock
+      {/* <AnimatedGradientBackground   /> */}
+      
+  <div style={{ width: "100%",
+    height: "100%",
+    position: "fixed",
+    top: 0,
+    left: 0,
+    zIndex: -1 }}>
+    <FloatingLines 
+    enabledWaves={['top', 'middle', 'bottom']}
+    // Array - specify line count per wave; Number - same count for all waves
+    lineCount={[5, 5, 6]}
+    // Array - specify line distance per wave; Number - same distance for all waves
+    lineDistance={[8, 6, 4]}
+    bendRadius={5.0}
+    bendStrength={-0.5}
+    interactive={true}
+    parallax={true}
+  />
+
+
+  
+</div>
+
+
+
+    
+
+
+    <Navbar  />
+    <FloatingDock
         items={[
           { title: "Create Article", href: "/#creat-article", icon: FaPlusCircle },
           { title: "Create Project", href: "/#creat-project", icon: FaProjectDiagram },
@@ -90,6 +119,14 @@ function App() {
               />
       </Routes>
       <Footer />
+
+
+
+
+
+    
+     
+      
       
     </>
   );
