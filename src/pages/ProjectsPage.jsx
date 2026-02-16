@@ -54,7 +54,7 @@ const ProjectsPage = () => {
   if (loading) return <LoadingScreen type='Projects' padd={40}  />;
   return (
     <Box p={8}>
-      <Heading mb={6} color="teal.300" textAlign="center">
+      <Heading mb={6} color="purple.500" textAlign="center">
         Projects ({filteredProjects.length})
       </Heading>
       <Box mb={4} maxW="400px" mx="auto">
@@ -96,7 +96,7 @@ const ProjectsPage = () => {
                 />
               )}
               <Card.Body gap="2">
-                <Card.Title mb="2" color="teal.200">
+                <Card.Title mb="2" color="purple.300">
                   {project.title}
                 </Card.Title>
                 <Card.Description color="gray.400" noOfLines={1}
