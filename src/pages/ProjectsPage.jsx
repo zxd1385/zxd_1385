@@ -98,7 +98,7 @@ const ProjectsPage = () => {
                   {project.title}
                 </Card.Title>
                 <Card.Description color="gray.400" noOfLines={1}
-                dangerouslySetInnerHTML={{ __html: project.description }}>
+                dangerouslySetInnerHTML={{ __html: project.description.slice(0,100) }}>
                 
                 </Card.Description>
               </Card.Body>
