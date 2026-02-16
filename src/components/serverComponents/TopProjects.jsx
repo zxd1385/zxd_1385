@@ -3,7 +3,7 @@ import { Box, Heading, Text, VStack, Image, Card, Stack, Button, HStack, Avatar 
 import { Link } from 'react-router-dom';
 import { supabase } from '../../lib/supabaseClient';
 
-const TopProjects = ({ limit = 3 }) => {
+const TopProjects = ({ limit = 3, setProjectsCount}) => {
   const [projects, setProjects] = useState([]);
 
   useEffect(() => {
@@ -19,16 +19,15 @@ const TopProjects = ({ limit = 3 }) => {
         `)
         .eq('is_visible', true)
         .order('created_at', { ascending: false })
-        .limit(limit);
       if (error) console.error('Error fetching projects:', error);
-      else setProjects(data);
+      else {setProjects(data.slice(0,limit)); setProjectsCount(data.length)};
     };
     fetchProjects();
   }, [limit]);
 
   return (
     <Box p={8}>
-      <Heading mb={6} color="teal.300" textAlign="center">
+      <Heading mb={6} color="purple.500" textAlign="center">
         Top Projects
       </Heading>
 
@@ -40,6 +39,7 @@ const TopProjects = ({ limit = 3 }) => {
         ) : (
           projects.map((project) => (
             <Card.Root
+              className='cursor-target'
               key={project.id}
               width="320px"
               variant="subtle"
@@ -59,7 +59,7 @@ const TopProjects = ({ limit = 3 }) => {
                 />
               )}
               <Card.Body gap="2">
-                <Card.Title mb="2" color="teal.200">
+                <Card.Title mb="2" color="purple.300">
                   {project.title}
                 </Card.Title>
                 <Card.Description color="gray.400" noOfLines={1}
@@ -86,7 +86,10 @@ const TopProjects = ({ limit = 3 }) => {
                 </Text>
               </HStack>
               <Link to={`/project/${project.id}`}>
-              <Button colorScheme="blue" size="xs">View Project</Button>
+              <Button 
+              className='cursor-target'
+              colorScheme="blue"
+              size="xs">View Project</Button>
                </Link>
               </Card.Footer>
             </Card.Root>

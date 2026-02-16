@@ -1,4 +1,5 @@
 import { Routes, Route } from "react-router-dom";
+import { useState, useEffect } from "react";
 import { FaPlusCircle, FaProjectDiagram, FaEnvelope } from "react-icons/fa";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
@@ -18,13 +19,25 @@ import CreateProjectPage from "./pages/CreateProjectPage";
 import ProtectedRoute from "./components/serverComponents/ProtectedRoute";
 import StatusBar from "./components/ui/StatusBar";
 import FloatingLines from "./components/ui/FloatingLines";
-
+import HandleTargetCursor from "./components/ui/HandleTargetCursor";
 
 function App() {
+
+  const [width, setWidth] = useState(window.innerWidth);
+  useEffect(() => {
+    const handleResize = () => {setWidth(window.innerWidth)};
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
   
   return (
     <>
+
+
+    {/* Target coursr */}
       
+
+
       {/* <AnimatedGradientBackground   /> */}
       
   <div style={{ width: "100%",
@@ -64,6 +77,13 @@ function App() {
       />
 
         <StatusBar />
+
+        
+        {width > 1000 && 
+      (
+        <HandleTargetCursor></HandleTargetCursor>
+      )
+      }
 
       <Routes>
               {/* Public Routes */}

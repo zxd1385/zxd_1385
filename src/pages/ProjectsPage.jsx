@@ -59,6 +59,7 @@ const ProjectsPage = () => {
       </Heading>
       <Box mb={4} maxW="400px" mx="auto">
         <Input
+          className='cursor-target'
           placeholder="Search Projects by Content, Author"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
@@ -75,6 +76,7 @@ const ProjectsPage = () => {
         ) : (
           filteredProjects.map((project) => (
             <Card.Root
+            className='cursor-target'
               key={project.id}
               width="320px"
               variant="subtle"
@@ -116,7 +118,7 @@ const ProjectsPage = () => {
                 </Text>
               </HStack>
               <Link to={`/project/${project.id}`}>
-              <Button colorScheme="blue" size="xs">View Project</Button>
+              <Button colorScheme="blue" size="xs" className='cursor-target'>View Project</Button>
                </Link>
                
               </Card.Footer>

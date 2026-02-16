@@ -5,7 +5,7 @@ import { supabase } from '../../lib/supabaseClient';
 import { useNavigate } from 'react-router-dom';
 import { useInView } from "react-intersection-observer";
 
-const TopArticles = ({ limit = 3 }) => {
+const TopArticles = ({ limit = 3 , setArticlesCount}) => {
   const [articles, setArticles] = useState([]);
   const navigate = useNavigate()
 
@@ -25,10 +25,9 @@ const TopArticles = ({ limit = 3 }) => {
           )
         `)
         .eq('is_visible', true)
-        .order('created_at', { ascending: false })
-        .limit(limit);
+        .order('created_at', { ascending: false });
       if (error) console.error('Error fetching articles:', error);
-      else setArticles(data);
+      else {setArticles(data.slice(0,limit)); setArticlesCount(data.length)};
     };
     fetchArticles();
   }, [limit]);
@@ -45,7 +44,7 @@ const TopArticles = ({ limit = 3 }) => {
 
   return (
     <Box p={8} >
-      <Heading mb={6} color="teal.300" textAlign="center">
+      <Heading mb={6} color="purple.500" textAlign="center">
         Top Articles
       </Heading>
 
@@ -58,6 +57,7 @@ const TopArticles = ({ limit = 3 }) => {
           articles.map((article) =>
              (
             <Card.Root
+              className='cursor-target'
               key={article.id}
               width="320px"
               variant="subtle"
@@ -67,7 +67,7 @@ const TopArticles = ({ limit = 3 }) => {
               transition="all 0.2s"
             >
               <Card.Body gap="2">
-                <Card.Title mb="2" color="teal.200">
+                <Card.Title mb="2" color="purple.300">
                   {article.title}
                 </Card.Title>
                 <Card.Description color="gray.400" noOfLines={3}>
@@ -90,6 +90,7 @@ const TopArticles = ({ limit = 3 }) => {
                 </VStack>
               </HStack>
                 <Button
+                className='cursor-target'
                   size="xs"
                   colorScheme="teal"
                   onClick={() => navigate(`/article/${article.id}`)}

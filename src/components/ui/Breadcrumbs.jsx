@@ -20,7 +20,8 @@ const Breadcrumbs = ({ pathSegments }) => {
       {pathSegments.map(({ label, href }, idx) => (
         <>
         <Breadcrumb.Item color="gray.100">
-        <Breadcrumb.Link href={href}
+        <Breadcrumb.Link 
+        href={href}
         color="gray.200"
         fontSize="sm"
         fontWeight="medium">

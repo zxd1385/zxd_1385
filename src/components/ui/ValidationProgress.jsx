@@ -78,7 +78,7 @@ import {
                 borderColor="gray.700"
                 bg="gray.900"
               >
-                <Heading size="sm" color="teal.200" mb={1}>
+                <Heading size="sm" color="purple.200" mb={1}>
                   {label}
                 </Heading>
   

@@ -267,7 +267,7 @@ const CreateArticle = () => {
 
   return (
     <Box p={8} maxW="600px" mx="auto">
-      <Heading color="gray.500" mb={6}>{id ? 'Edit Article' : 'Write a New Article'}</Heading>
+      <Heading color="purple.400" mb={6}>{id ? 'Edit Article' : 'Write a New Article'}</Heading>
 
       {errors.submit && <Text color="red.400">{errors.submit}</Text>}
 

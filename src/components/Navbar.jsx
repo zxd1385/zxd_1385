@@ -131,6 +131,7 @@ pauseBetweenAnimations={1}
       {/* Search Bar */}
       <Box position="relative" display="flex" alignItems="center">
         <Input
+        className="cursor-target"
           placeholder="Search Articles/Projects..."
           value={searchQuery}
           onChange={handleSearchChange}
@@ -138,7 +139,7 @@ pauseBetweenAnimations={1}
           size="sm"
           width="200px"
           color="#fff"
-          _focus={{ borderColor: "teal.300" }}
+          _focus={{ borderColor: "purple.300" }}
           variant="outline"
         />
         {isSearching ? <Spinner position="absolute" right="8px" color="gray.400" />
@@ -180,6 +181,7 @@ pauseBetweenAnimations={1}
       {isMobile ? (
         <>
           <button
+            className="cursor-target"
             style={styles.hamburger}
             onClick={() => setMenuOpen(!menuOpen)}
           >
@@ -195,6 +197,7 @@ pauseBetweenAnimations={1}
               )}
               {navItems.map((item, idx) => (
                 <a
+                  
                   key={idx}
                   href={item.href}
                   style={styles.mobileMenuItem}

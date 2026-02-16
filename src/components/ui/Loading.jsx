@@ -34,7 +34,7 @@ export default function LoadingScreen({type="", padd=2 }) {
             thickness="4px"
             speed="0.7s"
             emptyColor="gray.200"
-            color="teal.400"
+            color="purple.400"
           />
           <motion.div
             animate={{ opacity: [0.5, 1, 0.5] }}

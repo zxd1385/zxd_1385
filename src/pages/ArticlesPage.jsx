@@ -68,6 +68,7 @@ const ArticlesPage = () => {
       </Heading>
       <Box mb={4} maxW="400px" mx="auto">
         <Input
+          className='cursor-target'
           placeholder="Search Articles by Content, Author"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
@@ -84,6 +85,7 @@ const ArticlesPage = () => {
         ) : (
           filteredArticles.map((article) => (
             <Card.Root
+              className='cursor-target'
               key={article.id}
               width="320px"
               variant="subtle"
@@ -115,6 +117,7 @@ const ArticlesPage = () => {
                 </Text>
                 </HStack>
                 <Button
+                  className='cursor-target'
                   size="xs"
                   colorScheme="teal"
                   onClick={() => navigate(`/article/${article.id}`)}

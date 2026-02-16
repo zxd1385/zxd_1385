@@ -79,7 +79,7 @@ const ContactForm = () => {
   <Heading
     size="lg"
     textAlign="center"
-    color="teal.500"
+    color="purple.300"
     letterSpacing="wide"
   >
     Contact Us
@@ -100,6 +100,7 @@ const ContactForm = () => {
       <form onSubmit={handleSubmit}>
         <VStack spacing={5} align="stretch">
           <Input
+            className='cursor-target'
             placeholder="Your Name"
             value={formData.name}
             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
@@ -113,6 +114,7 @@ const ContactForm = () => {
           {errors.name && <Text color="red.400">{errors.name}</Text>}
 
           <Input
+            className='cursor-target'
             type="email"
             placeholder="Email"
             value={formData.email}
@@ -127,6 +129,7 @@ const ContactForm = () => {
           {errors.email && <Text color="red.400">{errors.email}</Text>}
 
           <Input
+            className='cursor-target'
             placeholder="Telegram ID"
             value={formData.telegram_id}
             onChange={(e) => setFormData({ ...formData, telegram_id: e.target.value })}
@@ -140,6 +143,7 @@ const ContactForm = () => {
           {errors.telegram_id && <Text color="red.400">{errors.telegram_id}</Text>}
 
           <Textarea
+            className='cursor-target'
             placeholder="Your Idea / Message"
             value={formData.idea}
             onChange={(e) => setFormData({ ...formData, idea: e.target.value })}
@@ -156,6 +160,7 @@ const ContactForm = () => {
           {success && <Text color="green.400" textAlign="center">{success}</Text>}
 
           <Button
+            className='cursor-target'
             type="submit"
             colorScheme="teal"
             isLoading={loading}

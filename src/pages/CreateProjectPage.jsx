@@ -195,7 +195,7 @@ const CreateProjectPage = () => {
 
   return (
     <Box p={8} maxW="600px" mx="auto">
-      <Heading color="gray.500" mb={6}>{id ? 'Edit Project' : 'Create Project'}</Heading>
+      <Heading color="purple.400" mb={6}>{id ? 'Edit Project' : 'Create Project'}</Heading>
       <VStack spacing={4} align="stretch">
         <Text color="gray.300">Project Title</Text>
         <Input

@@ -55,7 +55,7 @@ const UsersList = () => {
 
   return (
     <VStack align="stretch" spacing={4} mb={5}>
-      <Heading size="md" mb={4} color="teal.200">
+      <Heading size="md" mb={4} color="purple.200">
         {filteredUsers.length} Users
       </Heading>
       <Box mb={4}>

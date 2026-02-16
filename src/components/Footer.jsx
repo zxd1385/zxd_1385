@@ -74,7 +74,7 @@ export default function Footer() {
         {/* Quick Links */}
         <Stack direction={{ base: "column", md: "row" }} spacing={6}>
           {links.map((link) => (
-            <Link key={link.name} href={link.href} _hover={{ textDecoration: "underline", color: "teal.300" }}>
+            <Link key={link.name} href={link.href} _hover={{ textDecoration: "underline", color: "purple.300" }}>
               {link.name}
             </Link>
           ))}
@@ -83,7 +83,7 @@ export default function Footer() {
         {/* Socials */}
         <HStack mt={{ base: 4, md: 0 }} spacing={4}>
           {socials.map((social, idx) => (
-            <Link key={idx} href={social.href} isExternal _hover={{ color: "teal.300" }}>
+            <Link key={idx} href={social.href} isExternal _hover={{ color: "purple.300" }}>
               {social.icon}
             </Link>
           ))}
@@ -97,8 +97,8 @@ export default function Footer() {
         </Text>
         <HStack spacing={2}>
         
-          <Input placeholder="Your email" size="sm" bg="gray.800" border="none" _focus={{ borderColor: "teal.300" }} value={email}   onChange={(e) => setEmail(e.target.value)}   />
-          <Button colorScheme="teal" size="sm" onClick={handleSubscribe} >
+          <Input className='cursor-target' placeholder="Your email" size="sm" bg="gray.800" border="none" _focus={{ borderColor: "teal.300" }} value={email}   onChange={(e) => setEmail(e.target.value)}   />
+          <Button className='cursor-target' colorScheme="teal" size="sm" onClick={handleSubscribe} >
             {!sending ? "Subscribe" : "Sending"}
             {sending && <LuLoader className="animate-spin"/>}
           </Button>

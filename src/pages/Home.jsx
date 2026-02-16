@@ -5,7 +5,6 @@ import {
   Button,
   Stack,
   VStack,
-  Image,
   HStack
   
   
@@ -15,31 +14,26 @@ import 'swiper/css';
 import 'swiper/css/pagination';
 import 'swiper/css/navigation';
 import { motion } from "framer-motion";
-import { PixelatedCanvas } from "../components/PixelatedCanvas";
 import { useResponsiveSizes } from "../custom-js/useResponsiveSizes";
-import ArticleList from "../components/serverComponents/ArticleList";
 import { Swiper, SwiperSlide } from 'swiper/react';
-import { Pagination, Navigation, HashNavigation } from 'swiper/modules';
+import { Pagination, Navigation } from 'swiper/modules';
 import TopArticles from "../components/serverComponents/TopArticles";
 import TopProjects from "../components/serverComponents/TopProjects";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { supabase } from "../lib/supabaseClient";
-import { LuHand } from "react-icons/lu";
 import { FaRegHandPaper, FaSmile, FaInfoCircle  } from "react-icons/fa";
-import StudyngProgressBar from "../components/ui/StudyngProgressBar";
-import DraggableBox from "../components/ui/DraggableBox";
 import AnimatedCounter from "../components/ui/AnimatedCounter";
 import { useInView } from "react-intersection-observer";
-import BlurText from "../components/ui/TextAnimations/BlurText";
-import DecryptedText from "../components/ui/TextAnimations/DecryptedText";
 import TextType from "../components/ui/TextAnimations/TextType";
-
+import HandleTargetCursor from "../components/ui/HandleTargetCursor";
 
 
 const MotionBox = motion(Box);
 
 function Home() {
+  const [articlesCount, setArticlesCount] = useState(0);
+  const [projectsCount, setProjectsCount] = useState(0);
   const [message, setMessage] = useState('');
   const [show, setShow] = useState(false);
   const [icon, setIcon] = useState(null);
@@ -118,8 +112,9 @@ function Home() {
 
   return (
     <>
-    {/* <StudyngProgressBar /> */}
-    {/* <DraggableBox /> */}
+    
+
+    
 
     <Box
   position="fixed"
@@ -127,17 +122,13 @@ function Home() {
   left={{ base: 4, md: 40 }}       // 4 units on small screens, 40 units (~160px) on medium+
   zIndex="banner"
 >
-
-
-
-
-  <motion.div
+<motion.div
     initial={{ opacity: 0 }}
     animate={{ opacity: show ? 1 : 0 }}
     transition={{ duration: 1 }}
   >
     <Box
-      bg="teal.500"
+      bg="purple.600"
       color="white"
       px={1.5}
       py={1.5}
@@ -150,7 +141,11 @@ function Home() {
               </Text>
       </HStack>
     </Box>
-  </motion.div>
+</motion.div>
+
+
+
+
     </Box>
 
 
@@ -217,13 +212,14 @@ function Home() {
         lineHeight="short"
         color="gray.300"
       >
-        Hey, I'm <Text as="span" color="teal.400">zxd1385</Text>
+        Hey, I'm <Text as="span" color="purple.400">zxd1385</Text>
       </Heading>
       <Text fontSize={{ base: "md", md: "lg" }} color="gray.300" mb={6}>
         A passionate Electrical Engineering Student at Sharif University of Technology(EE-SUT) ...
         <br />see my github: https://github.com/zxd1385
       </Text>
       <Button
+      className="cursor-target"
         colorScheme="teal"
         size={{ base: "md", md: "lg" }}
         _hover={{ transform: "scale(1.05)" }}
@@ -253,26 +249,26 @@ function Home() {
         justify="space-around"
         align="center"
       >
+
         <Box>
-          <Text fontSize="2xl" color="teal.400" fontWeight="bold">
-          {startCount ? <AnimatedCounter target={1234} /> : 0}+
+          <Text color="gray.300" mt={2} fontSize={"1.1rem"}>My work in numbers:</Text>
+        </Box>
+
+        <Box>
+          <Text fontSize="2xl" color="purple.600" fontWeight="bold">
+          {startCount ? <AnimatedCounter target={articlesCount} /> : 0}+
           </Text>
           <Text color="gray.300" mt={2}>Articles</Text>
         </Box>
 
         <Box>
-          <Text fontSize="2xl" color="teal.400" fontWeight="bold">
-          {startCount ? <AnimatedCounter target={897} /> : 0}+
+          <Text fontSize="2xl" color="purple.600" fontWeight="bold">
+          {startCount ? <AnimatedCounter target={projectsCount} /> : 0}+
           </Text>
-          <Text color="gray.300" mt={2}>Users</Text>
+          <Text color="gray.300" mt={2}>Projects</Text>
         </Box>
 
-        <Box>
-          <Text fontSize="2xl" color="teal.400" fontWeight="bold">
-          {startCount ? <AnimatedCounter target={5678} /> : 0}+
-          </Text>
-          <Text color="gray.300" mt={2}>Comments</Text>
-        </Box>
+        
       </Stack>
     </Box>
 
@@ -323,6 +319,7 @@ function Home() {
                   {slide.text}
                 </Text>
                 <Button
+                className="cursor-target"
                   colorScheme="teal"
                   size={{ base: "sm", md: "lg" }}
                   variant="solid"
@@ -349,8 +346,8 @@ function Home() {
     w="full"
     pt={{ base: 12, md: 16 }}
   >
-    <TopArticles limit={5} />  {/* Show top 3 articles */}
-    <TopProjects limit={5} />  {/* Show top 3 projects */}
+    <TopArticles limit={5} setArticlesCount={setArticlesCount}/>  {/* Show top 3 articles */}
+    <TopProjects limit={5} setProjectsCount={setProjectsCount}/>  {/* Show top 3 projects */}
   </MotionBox>
     </Box>
 

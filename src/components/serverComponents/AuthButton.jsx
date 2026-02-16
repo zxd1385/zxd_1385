@@ -36,12 +36,12 @@ const AuthButton = () => {
 
   return session ? (
     <HStack spacing={4}>
-      <Button colorScheme="teal" size="xs" onClick={goToDashboard}>
+      <Button colorScheme="teal" size="xs" onClick={goToDashboard} className='cursor-target'>
         <Icon as={FaUser}  mr={2} />
         Dashboard
       </Button>
 
-      <Button colorScheme="red" size="xs" onClick={handleLogout}>
+      <Button colorScheme="red" size="xs" onClick={handleLogout} className='cursor-target'>
         <Icon as={FaSignOutAlt} mr={2} />
         Logout
       </Button>

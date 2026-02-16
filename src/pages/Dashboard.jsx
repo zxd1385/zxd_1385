@@ -538,7 +538,7 @@ const isValidDateOfBirth = (dateOfBirth) => {
       borderRadius="50%"
     />
     <VStack align="flex-start" spacing={1} ml={3}>
-      <Heading size="md" color="teal.500">{profile.name || "Unnamed User"}</Heading>
+      <Heading size="md" color="purple.500">{profile.name || "Unnamed User"}</Heading>
       <Text fontSize="sm" color="gray.500" maxWidth="300px" textAlign="left">
         {profile.bio || "No bio available."}
       </Text>
@@ -570,7 +570,7 @@ const isValidDateOfBirth = (dateOfBirth) => {
         )}
       </HStack>
       <Text fontSize="sm" fontWeight="bold" color="gray.600">
-        <HStack>Role: <Text as="span" color="teal.500"><HStack>{isAdmin ? <FaHeadset />  : <IoPerson />}{profile.role || "User"}</HStack></Text></HStack>
+        <HStack>Role: <Text as="span" color="purple.400"><HStack>{isAdmin ? <FaHeadset />  : <IoPerson />}{profile.role || "User"}</HStack></Text></HStack>
       </Text>
     </Box>
 </VStack>
@@ -579,6 +579,7 @@ const isValidDateOfBirth = (dateOfBirth) => {
 
   {/* Edit Button */}
   <Button
+    className='cursor-target'
     mt={4}
     colorScheme="teal"
     size="sm"
@@ -590,7 +591,9 @@ const isValidDateOfBirth = (dateOfBirth) => {
   </Button>
 
   {/* logout button */}
-  <Button mt={4}
+  <Button 
+    className='cursor-target'
+    mt={4}
     colorScheme="teal"
     size="sm"
     onClick={handleLogout}
@@ -601,7 +604,7 @@ const isValidDateOfBirth = (dateOfBirth) => {
 
   {/* Articles & Projects Section */}
   <Box mt={8}>
-    <Heading size="md" mb={3} color="teal.500">Your Articles({articles.length})</Heading>
+    <Heading size="md" mb={3} color="purple.300">Your Articles({articles.length})</Heading>
     {loadingArticles ? (<LoadingScreen type='Articles' />) : articles.length > 0 ? (
       articles.map((article) => (
         <HStack key={article.id} justify="space-between"  p={1} mb={1}>
@@ -614,8 +617,8 @@ const isValidDateOfBirth = (dateOfBirth) => {
                   ? "This article has been confirmed by zxdClub AI validation system" 
                   : "Pending article..."}
                     <HStack padding={1}>
-                      <Button size="xs" onClick={() => navigate(`/edit-article/${article.id}`)}><LuPen />Edit</Button>
-                      <Button size="xs" colorScheme="red" onClick={() => handleDeleteArticle(article.id)}><LuX />Delete</Button>
+                      <Button className='cursor-target' size="xs" onClick={() => navigate(`/edit-article/${article.id}`)}><LuPen />Edit</Button>
+                      <Button className='cursor-target' size="xs" colorScheme="red" onClick={() => handleDeleteArticle(article.id)}><LuX />Delete</Button>
                     </HStack>
                   </Alert.Description>
                 </Alert.Content>
@@ -626,7 +629,7 @@ const isValidDateOfBirth = (dateOfBirth) => {
       <Text fontSize="sm" color="gray.500">No articles found.</Text>
     )}
 
-    <Heading size="md" mt={6} mb={3} color="teal.500">Your Projects({projects.length})</Heading>
+    <Heading size="md" mt={6} mb={3} color="purple.300">Your Projects({projects.length})</Heading>
     {loadingProjects ? (<LoadingScreen type='Projects' />) : projects.length > 0 ? (
       projects.map((project) => (
         <HStack key={project.id} justify="space-between"  p={1} mb={1}>
@@ -640,8 +643,8 @@ const isValidDateOfBirth = (dateOfBirth) => {
                   ? "This project has been confirmed by admin" 
                   : "Pending project..."}
                     <HStack padding={1}>
-                        <Button size="xs" onClick={() => navigate(`/edit-project/${project.id}`)}><LuPen />Edit</Button>
-                        <Button size="xs" colorScheme="red" onClick={() => handleDeleteProject(project.id)}><LuX />Delet</Button>
+                        <Button className='cursor-target' size="xs" onClick={() => navigate(`/edit-project/${project.id}`)}><LuPen />Edit</Button>
+                        <Button className='cursor-target' size="xs" colorScheme="red" onClick={() => handleDeleteProject(project.id)}><LuX />Delet</Button>
                     </HStack>
                   </Alert.Description>
                 </Alert.Content>
@@ -658,7 +661,7 @@ const isValidDateOfBirth = (dateOfBirth) => {
 
 {isAdmin && (
   <Box mt={10} p={6} borderWidth="1px" borderRadius="lg" borderColor="gray.800" bg="gray.900" boxShadow="lg">
-  <Heading size="lg" mb={6} color="teal.300" textAlign="center">
+  <Heading size="lg" mb={6} color="purple.300" textAlign="center">
     Admin Panel
   </Heading>
 
@@ -673,7 +676,7 @@ const isValidDateOfBirth = (dateOfBirth) => {
   borderWidth="1px"
   borderColor="gray.700"
 >
-  <Heading size="md" mb={4} color="teal.300" textAlign="center">
+  <Heading size="md" mb={4} color="purple.300" textAlign="center">
     zxdClub Newsletter
   </Heading>
 

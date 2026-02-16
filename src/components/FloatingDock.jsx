@@ -39,6 +39,7 @@ export default function FloatingDock({ items }) {
           </div>
         )}
         <button
+          className='cursor-target'
           onClick={() => setMobileOpen(!mobileOpen)}
           style={styles.mobileToggle}
         >
@@ -52,6 +53,7 @@ export default function FloatingDock({ items }) {
     <div style={styles.desktopContainer}>
       {items.map((item, idx) => (
         <a
+          className='cursor-target'
           key={idx}
           href={item.href}
           onMouseEnter={() => setHoveredIndex(idx)}
